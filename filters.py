@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 import plotly.graph_objects as go
+import streamlit.components.v1 as components
 
 
 def filter(unity,phase):
@@ -445,28 +446,36 @@ def filter(unity,phase):
         fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
         st.plotly_chart(fig,use_container_width=True,height = 200) 
 
-sheets =["QT_avant","QT_PF","QT_après","QT_PRO",
-         "ESLI_avant","ESLI_PF", "ESLI_après","ESLI_PRO",
-         "ION_avant","ION_PF","ION_après","ION_PRO"]
+def rendement(data):
+    Mes_QT = (data['QT_avant']['MES']/data['QT_PF']['MES']).mean()
+    Mes_ESLI = (data['ESLI_avant']['MES']/data['ESLI_PF']['MES']).mean()
+    Mes_ION = (data['ION_avant']['MES (mg/l)']/data['ION_PF']['MES (mg/l)']).mean()
 
-data = {}
+    np.random.seed(42)
+    rd =[Mes_QT,Mes_ESLI,Mes_ION]
+    data = {
+        'Yield': rd,
+        'unity': ["QT","ESLI","ION"]
+    }
+    df = pd.DataFrame(data)
 
-for sheet in sheets:
-    data[sheet] = df = pd.read_excel('DATA/data préparé.xlsx',sheet_name=sheet)
 
-Mes_QT = (data['QT_PF']['MES']/data['QT_avant']['MES']).mean()
-Mes_ESLI = (data['ESLI_PF']['MES']/data['ESLI_avant']['MES']).mean()
-Mes_ION = (data['ION_PF']['MES (mg/l)']/data['ION_avant']['MES (mg/l)']).mean()
-'''
-Turb_QT = (data['QT_PRO']['Turb']/data['QT_avant']['Turb']).mean()
-Turb_ESLI = (data['ESLI_PRO']['Turb']/data['ESLI_avant']['Turb']).mean()
-Turb_ION = (data['ION_PRO']['Turb']/data['ION_avant']['Turb']).mean()'''
 
-print("MES yield for QT :",Mes_QT)
-print("MES yield for ESLI :",Mes_ESLI)
-print("MES yield for ION :",Mes_ION)
-'''
-print("Turb yield for QT :",Mes_QT)
-print("Turb yield for ESLI :",Mes_ESLI)
-print("Turb yield for ION :",Mes_ION)'''
+    # Création de l'histogramme avec des labels
+    fig = px.bar(df, x='unity', y='Yield')
+
+    fig.update_layout(
+        width=800,  # largeur en pixels
+        height=600  # hauteur en pixels
+    )
+    plot_html = fig.to_html(full_html=False)
+
+    # Utiliser HTML et CSS pour centrer le graphique
+    html_string = f"""
+    <div style="display: flex; justify-content: center;">
+        {plot_html}
+    </div>
+    """
+    components.html(html_string, height=600)
+
    
