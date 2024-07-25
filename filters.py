@@ -446,10 +446,10 @@ def filter(unity,phase):
         fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
         st.plotly_chart(fig,use_container_width=True,height = 200) 
 
-def rendement(data):
-    Mes_QT = (data['QT_avant']['MES']/data['QT_PF']['MES']).mean()
-    Mes_ESLI = (data['ESLI_avant']['MES']/data['ESLI_PF']['MES']).mean()
-    Mes_ION = (data['ION_avant']['MES (mg/l)']/data['ION_PF']['MES (mg/l)']).mean()
+def rendement_mes(data):
+    Mes_QT = ((data['QT_avant']['MES']-data['QT_PF']['MES'])/data['QT_avant']['MES']).mean()*100
+    Mes_ESLI = ((data['ESLI_avant']['MES']-data['ESLI_PF']['MES'])/data['ESLI_avant']['MES']).mean()*100
+    Mes_ION = ((data['ION_avant']['MES (mg/l)']-data['ION_PF']['MES (mg/l)'])/data['ION_avant']['MES (mg/l)']).mean()*100
 
     np.random.seed(42)
     rd =[Mes_QT,Mes_ESLI,Mes_ION]
@@ -478,4 +478,66 @@ def rendement(data):
     """
     components.html(html_string, height=600)
 
-   
+def rendement_PO43(data):
+    po4_QT = (data['QT_après']['PO43-'].mean())
+    po4_ESLI = (data['ESLI_après']['PO43-'].mean())
+    po4_ION = (data['ION_après']['PO43-'].mean())
+
+    np.random.seed(42)
+    rd =[po4_QT,po4_ESLI,po4_ION]
+    data = {
+        'Yield': rd,
+        'unity': ["QT","ESLI","ION"]
+    }
+    df = pd.DataFrame(data)
+
+
+
+    # Création de l'histogramme avec des labels
+    fig = px.bar(df, x='unity', y='Yield')
+
+    fig.update_layout(
+        width=800,  # largeur en pixels
+        height=600  # hauteur en pixels
+    )
+    plot_html = fig.to_html(full_html=False)
+
+    # Utiliser HTML et CSS pour centrer le graphique
+    html_string = f"""
+    <div style="display: flex; justify-content: center;">
+        {plot_html}
+    </div>
+    """
+    components.html(html_string, height=600)    
+
+def rendement_Turb(data):
+    Turb_QT = data['QT_avant']['Turb'].mean()/data['QT_PRO']['Turb'].mean()
+    Turb_ESLI = data['ESLI_avant']['Turb'].mean()/data['ESLI_PRO']['Turb'].mean()
+    Turb_ION = ((data['ION_avant']['Turb (NTU)Entrée A,B,C,D,E'].mean()+data['ION_avant']['Turb (NTU)Entrée A,B,C,D,E'].mean())/2)/data['ION_PRO']['Turb'].mean()
+
+    np.random.seed(42)
+    rd =[Turb_QT,Turb_ESLI,Turb_ION]
+    data = {
+        'Yield': rd,
+        'unity': ["QT","ESLI","ION"]
+    }
+    df = pd.DataFrame(data)
+
+
+
+    # Création de l'histogramme avec des labels
+    fig = px.bar(df, x='unity', y='Yield')
+
+    fig.update_layout(
+        width=800,  # largeur en pixels
+        height=600  # hauteur en pixels
+    )
+    plot_html = fig.to_html(full_html=False)
+
+    # Utiliser HTML et CSS pour centrer le graphique
+    html_string = f"""
+    <div style="display: flex; justify-content: center;">
+        {plot_html}
+    </div>
+    """
+    components.html(html_string, height=600) 
