@@ -22,7 +22,6 @@ def filter(unity,phase):
 
         with col2:
             date2 = pd.to_datetime(st.date_input("End Date", endDate))
-
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>pH moyen: {np.around(df['pH'].mean(),2)}</h2>", unsafe_allow_html=True)
@@ -443,7 +442,7 @@ def filter(unity,phase):
         fig = px.line(df,x="date",y=['Cond. (µS/cm) A', 'Cond. (µS/cm) B',
         'Cond. (µS/cm) C', 'Cond. (µS/cm) D', 'Cond. (µS/cm) E',
         'Cond. (µS/cm) F', 'Cond. (µS/cm) G', 'Cond. (µS/cm) H'])
-        fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+        fig.add_hline(y=450, line_dash="dash", line_color="white", line_width=2)
         st.plotly_chart(fig,use_container_width=True,height = 200) 
 
 def rendement_mes(data):
@@ -454,29 +453,23 @@ def rendement_mes(data):
     np.random.seed(42)
     rd =[Mes_QT,Mes_ESLI,Mes_ION]
     data = {
-        'Yield': rd,
-        'unity': ["QT","ESLI","ION"]
+        'unity': ["QT","ESLI","ION"],
+        'Yield': rd
     }
     df = pd.DataFrame(data)
 
 
+    # Sélection des catégories à afficher dans le pie chart
+    selected_categories = st.multiselect('Sélectionnez les Unité à inclure dans le graphique :', options=df['unity'].unique(), default=df['unity'].unique())
 
-    # Création de l'histogramme avec des labels
-    fig = px.bar(df, x='unity', y='Yield')
+    # Filtre les données en fonction des catégories sélectionnées
+    filtered_df = df[df['unity'].isin(selected_categories)]
 
-    fig.update_layout(
-        width=800,  # largeur en pixels
-        height=600  # hauteur en pixels
-    )
-    plot_html = fig.to_html(full_html=False)
-
-    # Utiliser HTML et CSS pour centrer le graphique
-    html_string = f"""
-    <div style="display: flex; justify-content: center;">
-        {plot_html}
-    </div>
-    """
-    components.html(html_string, height=600)
+    # Crée le pie chart avec Plotly
+    fig = px.pie(filtered_df, names='unity', values='Yield', title='Répartition des valeurs par catégorie')
+    fig.update_layout(title={'text': 'Répartition des rendements par unity', 'x': 0.36})
+# Affiche le pie chart avec Streamlit
+    st.plotly_chart(fig)
 
 def rendement_PO43(data):
     po4_QT = (data['QT_après']['PO43-'].mean())
@@ -486,61 +479,48 @@ def rendement_PO43(data):
     np.random.seed(42)
     rd =[po4_QT,po4_ESLI,po4_ION]
     data = {
-        'Yield': rd,
-        'unity': ["QT","ESLI","ION"]
+        'unity': ["QT","ESLI","ION"],
+        'Yield': rd
     }
     df = pd.DataFrame(data)
 
 
+    # Sélection des catégories à afficher dans le pie chart
+    selected_categories = st.multiselect('Sélectionnez les Unité à inclure dans le graphique :', options=df['unity'].unique(), default=df['unity'].unique())
 
-    # Création de l'histogramme avec des labels
-    fig = px.bar(df, x='unity', y='Yield')
+    # Filtre les données en fonction des catégories sélectionnées
+    filtered_df = df[df['unity'].isin(selected_categories)]
 
-    fig.update_layout(
-        width=800,  # largeur en pixels
-        height=600  # hauteur en pixels
-    )
-    plot_html = fig.to_html(full_html=False)
-
-    # Utiliser HTML et CSS pour centrer le graphique
-    html_string = f"""
-    <div style="display: flex; justify-content: center;">
-        {plot_html}
-    </div>
-    """
-    components.html(html_string, height=600)    
-
+    # Crée le pie chart avec Plotly
+    fig = px.pie(filtered_df, names='unity', values='Yield', title='Répartition des valeurs par catégorie')
+    fig.update_layout(title={'text': 'Répartition des rendements par unity', 'x': 0.36})
+# Affiche le pie chart avec Streamlit
+    st.plotly_chart(fig)
 def rendement_Turb(data):
-    Turb_QT = data['QT_avant']['Turb'].mean()/data['QT_PRO']['Turb'].mean()
-    Turb_ESLI = data['ESLI_avant']['Turb'].mean()/data['ESLI_PRO']['Turb'].mean()
-    Turb_ION = ((data['ION_avant']['Turb (NTU)Entrée A,B,C,D,E'].mean()+data['ION_avant']['Turb (NTU)Entrée A,B,C,D,E'].mean())/2)/data['ION_PRO']['Turb'].mean()
-
+    Turb_QT = ((data['QT_avant']['Turb']-data['QT_PRO']['Turb'])/data['QT_avant']['Turb']).mean()
+    Turb_ESLI = ((data['ESLI_avant']['Turb']-data['ESLI_PRO']['Turb'])/data['ESLI_avant']['Turb']).mean()
+    Turb_ION_ABCDE = ((data['ION_avant']['Turb (NTU)Entrée A,B,C,D,E']-data['ION_PRO']['Turb'])/data['ION_avant']['Turb (NTU)Entrée A,B,C,D,E']).mean()
+    Turb_ION_FGHIJ = ((data['ION_avant']['Turb (NTU)Entrée F,G,H,I,J']-data['ION_PRO']['Turb'])/data['ION_avant']['Turb (NTU)Entrée F,G,H,I,J']).mean()
     np.random.seed(42)
-    rd =[Turb_QT,Turb_ESLI,Turb_ION]
+    rd =[Turb_QT,Turb_ESLI,Turb_ION_ABCDE,Turb_ION_FGHIJ]
     data = {
-        'Yield': rd,
-        'unity': ["QT","ESLI","ION"]
+        'unity': ["QT","ESLI","Turb_ION_ABCDE","Turb_ION_FGHIJ"],
+        'Yield': rd
     }
     df = pd.DataFrame(data)
 
 
+    # Sélection des catégories à afficher dans le pie chart
+    selected_categories = st.multiselect('Sélectionnez les Unité à inclure dans le graphique :', options=df['unity'].unique(), default=df['unity'].unique())
 
-    # Création de l'histogramme avec des labels
-    fig = px.bar(df, x='unity', y='Yield')
+    # Filtre les données en fonction des catégories sélectionnées
+    filtered_df = df[df['unity'].isin(selected_categories)]
 
-    fig.update_layout(
-        width=800,  # largeur en pixels
-        height=600  # hauteur en pixels
-    )
-    plot_html = fig.to_html(full_html=False)
-
-    # Utiliser HTML et CSS pour centrer le graphique
-    html_string = f"""
-    <div style="display: flex; justify-content: center;">
-        {plot_html}
-    </div>
-    """
-    components.html(html_string, height=600) 
+    # Crée le pie chart avec Plotly
+    fig = px.pie(filtered_df, names='unity', values='Yield', title='Répartition des valeurs par catégorie')
+    fig.update_layout(title={'text': 'Répartition des rendements par unity', 'x': 0.36})
+# Affiche le pie chart avec Streamlit
+    st.plotly_chart(fig)
 
 def compare(unity):
     #filtrage selon l'unité QT
@@ -989,18 +969,27 @@ def filtrage(data):
     for i in range(len(data[0])):
         for j in range(len(data[1])):
             df[f"{data[0][i]}_{data[1][j]}"] = pd.read_excel('DATA/data préparé.xlsx',sheet_name=f"{data[0][i]}_{data[1][j]}")
-   
+ 
     for i in range(len(data[2])):
        params.append(data[2][i])
-    for k in df.keys():
-    for param in params:
-        for k in df:
-            if (param in df[k].columns):
-                st.markdown(f"<h2 style='text-align: center;'>{param} moyen: {np.around(df[k][param].mean(),2)}</h2>", unsafe_allow_html=True)
-                fig = px.line(df[k],x="date",y=param)
-                st.plotly_chart(fig,use_container_width=True,height = 200)
-            else:
-                st.markdown(f"<p style='text-align: center;'>le {param} n'a pas été injecter dans {k}</p>", unsafe_allow_html=True)
+    date1 = pd.to_datetime(st.date_input("Date"))
+    Variation_param_pendant_phase(df,params,date1)
+         
+def Variation_param_pendant_phase(df,params,date1):
 
+        for k in df.keys():
+            df[k]['date'] = pd.to_datetime(df[k]['date'])
+            df[k] = df[k][df[k]["date"] == date1]
+        for param in params:
+            x1= []
+            x2 = []
+            for k in df.keys():
+                if( param in df[k]):
+                    x1.append(float(df[k][param].mean()))
+                    x2.append(k)
+              
+            fig = px.line(x=x2,y=x1,title=f"Variation de {param} pendant les phases de traitement")
+            fig.update_layout(title={'text': f"Variation de {param} pendant les phases de traitement", 'x': 0.36})
+            st.plotly_chart(fig,use_container_width=True,height = 200) 
     
          
