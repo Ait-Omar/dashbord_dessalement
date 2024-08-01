@@ -78,8 +78,8 @@ if uploaded_file is not None:
                                     'Perméat filtration',
                                     'Après filtration à cartouche',
                                     'Perméat RO'])
-
-        sheets =["QT_PF","QT_après","QT_PRO",
+        filter(uploaded_file,unity,phase)
+        sheets =["intake","QT_PF","QT_après","QT_PRO",
             "ESLI_PF", "ESLI_après","ESLI_PRO",
             "ION_PF","ION_après","ION_PRO",
             "MCT_après","MCT_PRO"]
@@ -94,23 +94,36 @@ if uploaded_file is not None:
                                     "ION",
                                     "MCT"])
         if unity_to_compare == ["MCT"]:
-            phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+            phase_to_compare = st.sidebar.multiselect('Phase de traitement (intake a été séléctioné par defaut):',
                                     [
                                     'après',
                                     'PRO'])  
         else:
-            phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+            phase_to_compare = st.sidebar.multiselect('Phase de traitement (intake a été séléctioné par defaut):',
                                     [
                                     'PF',
                                     'après',
                                     'PRO'])  
-
+  
         if phase_to_compare:
-            param_to_compare = st.sidebar.multiselect('paramètres:',
-                                    data[f"{unity_to_compare[0]}_{phase_to_compare[0]}"].columns[1:])  
-        filter(uploaded_file,unity,phase)
-        if unity_to_compare and phase_to_compare and param_to_compare:
-         filtrage(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare])        
+            param_to_compare_intake = st.sidebar.multiselect('paramètres d\'intake:',
+                                    data["intake"].columns[1:])  
+            param_to_compare = {}
+            param_to_compare["intake"] = param_to_compare_intake
+            for i in range(len(unity_to_compare)):  
+                for j in range(len(phase_to_compare)):  
+                    param_to_compare[phase_to_compare[j]] = st.sidebar.multiselect(f'paramètres d\'{phase_to_compare[j]}',
+                                        data[f"{unity_to_compare[i]}_{phase_to_compare[j]}"].columns[1:]) 
+
+        if param_to_compare_intake:
+           filtrage(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare])
+                 
+        
+       
+
+    
+
+                  
     except Exception as e:
 
         st.markdown(f"<h3 style='text-align: center;color:red;'> le fichier n'est pas dans le format adapté: {e}</h3>", unsafe_allow_html=True)
