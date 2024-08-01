@@ -4,6 +4,7 @@ import plotly.express as px
 import numpy as np
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
+import random
 
 
 def filter(df,unity,phase):
@@ -3037,15 +3038,15 @@ def compare(unity):
 def filtrage(t,data):
     df ={}
     params = data[2]
-    print(params)
     for i in range(len(data[0])):
         for j in range(len(data[1])):
             df[f"{data[1][j]}"] = pd.read_excel(t,sheet_name=f"{data[0][i]}_{data[1][j]}")
     df['intake'] = pd.read_excel(t,sheet_name="intake")
+
     date1 = pd.to_datetime(st.date_input("Date"))
     Variation_param_pendant_phase(df,params,date1)   
 def Variation_param_pendant_phase(df,params,date1):
-       
+        
         for k in df.keys():
             df[k]['date'] = pd.to_datetime(df[k]['date'])
             df[k] = df[k][df[k]["date"] == date1]
@@ -3054,17 +3055,16 @@ def Variation_param_pendant_phase(df,params,date1):
          
         x1 =[]
         x2 = []
-        print("avant : ",x1,x2)
-        print("tottal:",len(params.keys()))
+
         for param, value in params.items():
             if value:
                 if param in df.keys():
                     x1.append(float(df[param][params[param][0]].mean()))
                     x2.append(param) 
- 
-        print("après: ",x1,x2)    
+  
 
-        colors = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA']  
+        #colors = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA']  
+        colors = generate_hex_colors(len(params)) 
         fig = go.Figure(data=[go.Bar(x=x2, y=x1, marker_color=colors, text=x1, textposition='outside')])
         fig.update_layout(
             title={'text': f"Variation de {params[param][0]} dans l'unité {k.split('_')[0]} pendant les phases de traitement", 'x': 0.36},
@@ -3073,3 +3073,9 @@ def Variation_param_pendant_phase(df,params,date1):
             bargap=0.7   # Ajustez l'espace entre les barres
         )
         st.plotly_chart(fig,use_container_width=True) 
+def generate_hex_colors(n):
+    colors = []
+    for _ in range(n):
+        color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
+        colors.append(color)
+    return colors

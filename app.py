@@ -126,7 +126,7 @@ if uploaded_file is not None:
                   
     except Exception as e:
 
-        st.markdown(f"<h3 style='text-align: center;color:red;'> le fichier n'est pas dans le format adapté: {e}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='text-align: center;color:red;'> </h3>", unsafe_allow_html=True)
 
 else:
     st.markdown('<div class="centered">Veuillez charger un fichier Excel bien adapter pour commencer.</div>', unsafe_allow_html=True)
