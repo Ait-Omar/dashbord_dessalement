@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from fonctions import filter,filtrage,graphique
+from fonctions import filter,filtrage,visualisation_param_en_fonction_dautre
 from PIL import Image
 import base64
 from io import BytesIO
@@ -33,7 +33,7 @@ st.sidebar.markdown(
     """, 
     unsafe_allow_html=True
 )
-st.markdown("<h1 style='text-align: center;'> Dessalement mobile de l'eau de mer à JORF LASFAR</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;color:#095DBA;'> Dessalement mobile de l'eau de mer à JORF LASFAR</h1>", unsafe_allow_html=True)
 st.markdown('<style>div.block-container{padding-top:3rem;}</style>',unsafe_allow_html=True)
 hide_file_upload_style = """
     <style>
@@ -52,13 +52,32 @@ hide_file_upload_style = """
 """
 st.markdown(hide_file_upload_style, unsafe_allow_html=True)
 uploaded_file = st.file_uploader("Choisissez un fichier Excel", type=["xlsx", "xls"])
+container_style = """
+        <style>
+        .container {
+            background-color: #095DBA;  /* Couleur de l'arrière-plan */
+            border: 2px solid #095DBA;  /* Bordure */
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .container h3 {
+        color: white;  /* Couleur du texte */
+        font-family: 'Lobster', cursive;  /* Type de police */
+        font-size: 20px;  /* Taille de la police */
+        }
+        </style>
+        <div class="container">
+        """
 
 if uploaded_file is not None:
     try:
         with st.container():
-            st.sidebar.markdown("<h3 style='text-align: center;'>Visualisation des paramètres: </h3>", unsafe_allow_html=True)
-
-
+            #st.sidebar.markdown("<h3 style='text-align: center;'>Visualisation des paramètres: </h3>", unsafe_allow_html=True)
+            container_content0 = """
+        <h3 style='text-align: center;'>Visualisation des paramètres: </h3>
+        </div>
+        """
+            st.sidebar.markdown(container_style + container_content0, unsafe_allow_html=True)
             unity = st.sidebar.selectbox('Unité:',
                                         ["Options",
                                         "QT",
@@ -79,11 +98,21 @@ if uploaded_file is not None:
                                         'Après filtration à cartouche',
                                         'Perméat RO'])
             filter(uploaded_file,unity,phase)
+        
         sheets =["intake","QT_PF","QT_après","QT_PRO",
             "ESLI_PF", "ESLI_après","ESLI_PRO",
             "ION_PF","ION_après","ION_PRO",
             "MCT_après","MCT_PRO"]
-        st.sidebar.markdown("<h3 style='text-align: center;'>Comparaison des paramètres dans la même unité: </h3>", unsafe_allow_html=True)
+
+   
+        container_content1 = """
+        <h3 style='text-align: center;'>Comparaison des phases de traitement: </h3>
+        </div>
+        """
+
+
+        st.sidebar.markdown(container_style + container_content1, unsafe_allow_html=True)
+        #st.sidebar.markdown("<h3 style='text-align: center;'>Comparaison des paramètres dans la même unité: </h3>", unsafe_allow_html=True)
         data = {}
         for sheet in sheets:
             data[sheet] = pd.read_excel(uploaded_file,sheet_name=sheet)
@@ -115,15 +144,18 @@ if uploaded_file is not None:
                     param_to_compare[phase_to_compare[j]] = st.sidebar.multiselect(f'paramètres d\'{phase_to_compare[j]}',
                                         data[f"{unity_to_compare[i]}_{phase_to_compare[j]}"].columns[1:]) 
 
-        filtrage(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare])
-                 
-                  
+        filtrage(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare])           
     except Exception as e:
 
         st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
     
     try:
-        st.sidebar.markdown("<h3 style='text-align: center;'>Variation des paramètres en focntion des autres:</h3>", unsafe_allow_html=True)
+        container_content2 = """
+        <h3 style='text-align: center;'>Variation des paramètres en fonction d'autre:</h3>
+        </div>
+        """
+        st.sidebar.markdown(container_style + container_content2, unsafe_allow_html=True)
+        #st.sidebar.markdown("<h3 style='text-align: center;'>Variation des paramètres en focntion des autres:</h3>", unsafe_allow_html=True)
         unity_to_compare1 = st.sidebar.selectbox('Unité:',
                                 [
                                     "options",
@@ -150,11 +182,13 @@ if uploaded_file is not None:
                                     data[f"{unity_to_compare1}_{phase_to_compare1}"].columns[1:])  
             param2 = st.sidebar.selectbox('ordonnée ',
                                     data[f"{unity_to_compare1}_{phase_to_compare1}"].columns[1:])    
-        graphique(data[f"{unity_to_compare1}_{phase_to_compare1}"],param1,param2)
+        visualisation_param_en_fonction_dautre(data[f"{unity_to_compare1}_{phase_to_compare1}"],param1,param2)
+
     except Exception as e:
 
         st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
+    
+
 else:
     st.markdown('<div class="centered">Veuillez charger un fichier Excel bien adapter pour commencer.</div>', unsafe_allow_html=True)
 
-    

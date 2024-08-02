@@ -3080,7 +3080,13 @@ def generate_hex_colors(n):
         color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
         colors.append(color)
     return colors
-def graphique(df,x,y):
-    st.markdown(f"<h2 style='text-align: center;'>Variation de {y} en fonction de {x}</h2>", unsafe_allow_html=True)
-    fig = px.line(df,x=x,y=y)
-    st.plotly_chart(fig,use_container_width=True,height = 200)
+def visualisation_param_en_fonction_dautre(df,x,y):
+    fig = go.Figure(data=[go.Scatter(x=df[x], y=df[y], mode='lines')])
+    fig.update_layout(
+    title={'text': f"Variation de {y} en fonction de {x}", 'x': 0.36},
+    height=400,  # Ajustez la hauteur ici
+    margin=dict(l=400, r=400, t=40, b=40)
+    )
+    st.plotly_chart(fig, use_container_width=True)
+#def unity_compare(data):
+
