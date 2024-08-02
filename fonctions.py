@@ -233,104 +233,6 @@ def filter(df,unity,phase):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col2:
-            st.markdown(f"<h2 style='text-align: center;'>Cond B moyen : {np.around(df['Cond B'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y='Cond B')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
-            fig.add_annotation(
-                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond B doit être inférieure à 450",  # Texte de l'annotation
-                        showarrow=True,  # Afficher une flèche pointant vers le point
-                        arrowhead=2,  # Type de flèche
-                        ax=0,  # Position X de la flèche par rapport au texte
-                        ay=-40  # Position Y de la flèche par rapport au texte
-                    )
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Cond C moyen : {np.around(df['Cond C'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y='Cond C')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
-            fig.add_annotation(
-                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond C doit être inférieure à 450",  # Texte de l'annotation
-                        showarrow=True,  # Afficher une flèche pointant vers le point
-                        arrowhead=2,  # Type de flèche
-                        ax=0,  # Position X de la flèche par rapport au texte
-                        ay=-40  # Position Y de la flèche par rapport au texte
-                    )
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>Cond D moyen : {np.around(df['Cond D'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y='Cond D')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
-            fig.add_annotation(
-                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond D doit être inférieure à 450",  # Texte de l'annotation
-                        showarrow=True,  # Afficher une flèche pointant vers le point
-                        arrowhead=2,  # Type de flèche
-                        ax=0,  # Position X de la flèche par rapport au texte
-                        ay=-40  # Position Y de la flèche par rapport au texte
-                    )
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Cond E moyen : {np.around(df['Cond E'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y='Cond E')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
-            fig.add_annotation(
-                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond E doit être inférieure à 450",  # Texte de l'annotation
-                        showarrow=True,  # Afficher une flèche pointant vers le point
-                        arrowhead=2,  # Type de flèche
-                        ax=0,  # Position X de la flèche par rapport au texte
-                        ay=-40  # Position Y de la flèche par rapport au texte
-                    )
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>Cond F moyen : {np.around(df['Cond F'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y='Cond F')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
-            fig.add_annotation(
-                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond F doit être inférieure à 450",  # Texte de l'annotation
-                        showarrow=True,  # Afficher une flèche pointant vers le point
-                        arrowhead=2,  # Type de flèche
-                        ax=0,  # Position X de la flèche par rapport au texte
-                        ay=-40  # Position Y de la flèche par rapport au texte
-                    )
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Cond G moyen : {np.around(df['Cond G'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y='Cond G')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
-            fig.add_annotation(
-                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond G doit être inférieure à 450",  # Texte de l'annotation
-                        showarrow=True,  # Afficher une flèche pointant vers le point
-                        arrowhead=2,  # Type de flèche
-                        ax=0,  # Position X de la flèche par rapport au texte
-                        ay=-40  # Position Y de la flèche par rapport au texte
-                    )
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>Cond H moyen : {np.around(df['Cond H'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y='Cond H')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
-            fig.add_annotation(
-                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond H doit être inférieure à 450",  # Texte de l'annotation
-                        showarrow=True,  # Afficher une flèche pointant vers le point
-                        arrowhead=2,  # Type de flèche
-                        ax=0,  # Position X de la flèche par rapport au texte
-                        ay=-40  # Position Y de la flèche par rapport au texte
-                    )
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
             st.markdown(f"<h2 style='text-align: center;'>pH A moyen : {np.around(df['pH A'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='pH A')
             fig.add_hline(y=5.4, line_dash="dash", line_color="red", line_width=2)
@@ -338,6 +240,20 @@ def filter(df,unity,phase):
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
                         y=5.4,  # Position Y (sur la ligne horizontale)
                         text="pH A doit être supérieur à 5.4",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Cond B moyen : {np.around(df['Cond B'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='Cond B')
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond B doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -359,6 +275,20 @@ def filter(df,unity,phase):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Cond C moyen : {np.around(df['Cond C'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='Cond C')
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond C doit être inférieure à 450",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
             st.markdown(f"<h2 style='text-align: center;'>pH C moyen : {np.around(df['pH C'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='pH C')
             fig.add_hline(y=5.4, line_dash="dash", line_color="red", line_width=2)
@@ -366,6 +296,20 @@ def filter(df,unity,phase):
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
                         y=5.4,  # Position Y (sur la ligne horizontale)
                         text="pH C doit être supérieur à 5.4",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Cond D moyen : {np.around(df['Cond D'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='Cond D')
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond D doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -387,6 +331,20 @@ def filter(df,unity,phase):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Cond E moyen : {np.around(df['Cond E'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='Cond E')
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond E doit être inférieure à 450",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
             st.markdown(f"<h2 style='text-align: center;'>pH E moyen : {np.around(df['pH E'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='pH E')
             fig.add_hline(y=5.4, line_dash="dash", line_color="red", line_width=2)
@@ -394,6 +352,20 @@ def filter(df,unity,phase):
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
                         y=5.4,  # Position Y (sur la ligne horizontale)
                         text="pH E doit être supérieur à 5.4",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Cond F moyen : {np.around(df['Cond F'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='Cond F')
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond F doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -415,6 +387,20 @@ def filter(df,unity,phase):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Cond G moyen : {np.around(df['Cond G'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='Cond G')
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond G doit être inférieure à 450",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
             st.markdown(f"<h2 style='text-align: center;'>pH G moyen : {np.around(df['pH G'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='pH G')
             fig.add_hline(y=5.4, line_dash="dash", line_color="red", line_width=2)
@@ -422,6 +408,20 @@ def filter(df,unity,phase):
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
                         y=5.4,  # Position Y (sur la ligne horizontale)
                         text="pH G doit être supérieur à 5.4",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Cond H moyen : {np.around(df['Cond H'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='Cond H')
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond H doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -3058,16 +3058,17 @@ def Variation_param_pendant_phase(df,params,date1):
 
         for param, value in params.items():
             if value:
-                if param in df.keys():
-                    x1.append(float(df[param][params[param][0]].mean()))
-                    x2.append(param) 
+                   for i in params[param]:
+                        print(i)
+                        x1.append(float(df[param][i].mean()))
+                        x2.append(f"{[i][0]}_{param}") 
   
 
         #colors = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA']  
         colors = generate_hex_colors(len(params)) 
         fig = go.Figure(data=[go.Bar(x=x2, y=x1, marker_color=colors, text=x1, textposition='outside')])
         fig.update_layout(
-            title={'text': f"Variation de {params[param][0]} dans l'unité {k.split('_')[0]} pendant les phases de traitement", 'x': 0.36},
+            title={'text': f"Variation de {params[param][0]}", 'x': 0.36},
             height=400,  # Ajustez la hauteur ici
             margin=dict(l=400, r=400, t=40, b=40),
             bargap=0.7   # Ajustez l'espace entre les barres
@@ -3079,3 +3080,7 @@ def generate_hex_colors(n):
         color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
         colors.append(color)
     return colors
+def graphique(df,x,y):
+    st.markdown(f"<h2 style='text-align: center;'>Variation de {y} en fonction de {x}</h2>", unsafe_allow_html=True)
+    fig = px.line(df,x=x,y=y)
+    st.plotly_chart(fig,use_container_width=True,height = 200)

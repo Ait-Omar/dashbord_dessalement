@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from fonctions import filter,filtrage
+from fonctions import filter,filtrage,graphique
 from PIL import Image
 import base64
 from io import BytesIO
@@ -53,53 +53,53 @@ hide_file_upload_style = """
 st.markdown(hide_file_upload_style, unsafe_allow_html=True)
 uploaded_file = st.file_uploader("Choisissez un fichier Excel", type=["xlsx", "xls"])
 
-
 if uploaded_file is not None:
     try:
-        st.sidebar.markdown("<h3 style='text-align: center;'>Visualisation des paramètres: </h3>", unsafe_allow_html=True)
+        with st.container():
+            st.sidebar.markdown("<h3 style='text-align: center;'>Visualisation des paramètres: </h3>", unsafe_allow_html=True)
 
 
-        unity = st.sidebar.selectbox('Unité:',
-                                    ["Options",
-                                    "QT",
-                                        "ESLI",
-                                        "ION EXCHANGE",
-                                        "MCT"])
+            unity = st.sidebar.selectbox('Unité:',
+                                        ["Options",
+                                        "QT",
+                                            "ESLI",
+                                            "ION EXCHANGE",
+                                            "MCT"])
 
-        if (unity == "MCT"):
-            phase = st.sidebar.selectbox('Phase de traitement:',
-                                    ['Options',
-                                    'Après filtration à cartouche',
-                                    'Perméat RO'])
-        else:
-            phase = st.sidebar.selectbox('Phase de traitement:',
-                                    ['Options',
-                                    'intake',
-                                    'Perméat filtration',
-                                    'Après filtration à cartouche',
-                                    'Perméat RO'])
-        filter(uploaded_file,unity,phase)
+            if (unity == "MCT"):
+                phase = st.sidebar.selectbox('Phase de traitement:',
+                                        ['Options',
+                                        'Après filtration à cartouche',
+                                        'Perméat RO'])
+            else:
+                phase = st.sidebar.selectbox('Phase de traitement:',
+                                        ['Options',
+                                        'intake',
+                                        'Perméat filtration',
+                                        'Après filtration à cartouche',
+                                        'Perméat RO'])
+            filter(uploaded_file,unity,phase)
         sheets =["intake","QT_PF","QT_après","QT_PRO",
             "ESLI_PF", "ESLI_après","ESLI_PRO",
             "ION_PF","ION_après","ION_PRO",
             "MCT_après","MCT_PRO"]
-        st.sidebar.markdown("<h3 style='text-align: center;'>Comparaison des paramètres: </h3>", unsafe_allow_html=True)
+        st.sidebar.markdown("<h3 style='text-align: center;'>Comparaison des paramètres dans la même unité: </h3>", unsafe_allow_html=True)
         data = {}
         for sheet in sheets:
             data[sheet] = pd.read_excel(uploaded_file,sheet_name=sheet)
 
-        unity_to_compare = st.sidebar.multiselect('Unité:',
+        unity_to_compare = st.sidebar.multiselect('Unité (choisir une seule unité):',
                                 ["QT",
                                     "ESLI",
                                     "ION",
                                     "MCT"])
         if unity_to_compare == ["MCT"]:
-            phase_to_compare = st.sidebar.multiselect('Phase de traitement (intake a été séléctioné par defaut):',
+            phase_to_compare = st.sidebar.multiselect('Phase de traitement (intake a été séléctionné par defaut):',
                                     [
                                     'après',
                                     'PRO'])  
         else:
-            phase_to_compare = st.sidebar.multiselect('Phase de traitement (intake a été séléctioné par defaut):',
+            phase_to_compare = st.sidebar.multiselect('Phase de traitement (intake a été séléctionné par defaut):',
                                     [
                                     'PF',
                                     'après',
@@ -115,19 +115,45 @@ if uploaded_file is not None:
                     param_to_compare[phase_to_compare[j]] = st.sidebar.multiselect(f'paramètres d\'{phase_to_compare[j]}',
                                         data[f"{unity_to_compare[i]}_{phase_to_compare[j]}"].columns[1:]) 
 
-        if param_to_compare_intake:
-           filtrage(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare])
+        filtrage(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare])
                  
-        
-       
-
-    
-
                   
     except Exception as e:
 
-        st.markdown(f"<h3 style='text-align: center;color:red;'> </h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
+    
+    try:
+        st.sidebar.markdown("<h3 style='text-align: center;'>Variation des paramètres en focntion des autres:</h3>", unsafe_allow_html=True)
+        unity_to_compare1 = st.sidebar.selectbox('Unité:',
+                                [
+                                    "options",
+                                    "QT",
+                                    "ESLI",
+                                    "ION",
+                                    "MCT"])
+        if unity_to_compare1 == "MCT":
+            phase_to_compare1 = st.sidebar.selectbox('Phase de traitement :',
+                                    [
+                                    "options",
+                                    'après',
+                                    'PRO'])  
+        else:
+            phase_to_compare1 = st.sidebar.selectbox('Phase de traitement :',
+                                    [
+                                    "options",
+                                    'PF',
+                                    'après',
+                                    'PRO'])  
 
+        if phase_to_compare1:
+            param1 = st.sidebar.selectbox('Abscisse ',
+                                    data[f"{unity_to_compare1}_{phase_to_compare1}"].columns[1:])  
+            param2 = st.sidebar.selectbox('ordonnée ',
+                                    data[f"{unity_to_compare1}_{phase_to_compare1}"].columns[1:])    
+        graphique(data[f"{unity_to_compare1}_{phase_to_compare1}"],param1,param2)
+    except Exception as e:
+
+        st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
 else:
     st.markdown('<div class="centered">Veuillez charger un fichier Excel bien adapter pour commencer.</div>', unsafe_allow_html=True)
 
