@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from fonctions import filter,filtrage,visualisation_param_en_fonction_dautre
+from fonctions import filter,filtrage,visualisation_param_en_fonction_dautre,unity_compare
 from PIL import Image
 import base64
 from io import BytesIO
@@ -11,7 +11,6 @@ from io import BytesIO
 
 
 st.set_page_config(page_title="DIPS", page_icon="logo.png",layout="wide")
-import streamlit as st
 
 
 def image_to_base64(image_path):
@@ -51,7 +50,6 @@ hide_file_upload_style = """
     </style>
 """
 st.markdown(hide_file_upload_style, unsafe_allow_html=True)
-uploaded_file = st.file_uploader("Choisissez un fichier Excel", type=["xlsx", "xls"])
 container_style = """
         <style>
         .container {
@@ -69,9 +67,18 @@ container_style = """
         <div class="container">
         """
 
+uploaded_file = st.file_uploader("Choisissez un fichier Excel", type=["xlsx", "xls"])
 if uploaded_file is not None:
+    sheets =["QT_intake","QT_PERMEAT FILTRATION","QT_APRES FILTRES A CARTOUCHE","QT_PERMEAT RO","QT_sortie_global",
+            "ESLI_intake","ESLI_PERMEAT FILTRATION", "ESLI_APRES FILTRES A CARTOUCHE","ESLI_PERMEAT RO",
+            "ION_intake","ION_PERMEAT FILTRATION","ION_Bac_stockage","ION_APRES FILTRES A CARTOUCHE","ION_PERMEAT RO",
+            "MCT_intake","MCT_APRES FILTRES A CARTOUCHE","MCT_PERMEAT RO"]
+    data = {}
+    for sheet in sheets:
+            data[sheet] = pd.read_excel(uploaded_file,sheet_name=sheet)
+
     try:
-        with st.container():
+
             #st.sidebar.markdown("<h3 style='text-align: center;'>Visualisation des paramètres: </h3>", unsafe_allow_html=True)
             container_content0 = """
         <h3 style='text-align: center;'>Visualisation des paramètres: </h3>
@@ -80,7 +87,7 @@ if uploaded_file is not None:
             st.sidebar.markdown(container_style + container_content0, unsafe_allow_html=True)
             unity = st.sidebar.selectbox('Unité:',
                                         ["Options",
-                                        "QT",
+                                            "QT",
                                             "ESLI",
                                             "ION EXCHANGE",
                                             "MCT"])
@@ -88,107 +95,142 @@ if uploaded_file is not None:
             if (unity == "MCT"):
                 phase = st.sidebar.selectbox('Phase de traitement:',
                                         ['Options',
-                                        'Après filtration à cartouche',
-                                        'Perméat RO'])
-            else:
+                                        'intake',
+                                        'APRES FILTRES A CARTOUCHE',
+                                        'PERMEAT RO'])
+            elif  (unity == "QT"):
                 phase = st.sidebar.selectbox('Phase de traitement:',
                                         ['Options',
                                         'intake',
-                                        'Perméat filtration',
-                                        'Après filtration à cartouche',
-                                        'Perméat RO'])
+                                        'PERMEAT FILTRATION',
+                                        'APRES FILTRES A CARTOUCHE',
+                                        'PERMEAT RO',
+                                        'QT_sortie_global'])
+            elif (unity == "ION EXCHANGE"):
+                phase = st.sidebar.selectbox('Phase de traitement:',
+                                        ['Options',
+                                        'intake',
+                                        'PERMEAT FILTRATION',
+                                        'ION_Bac_stockage',
+                                        'APRES FILTRES A CARTOUCHE',
+                                        'PERMEAT RO',
+                                        ])
+            elif(unity == "ESLI"):
+                phase = st.sidebar.selectbox('Phase de traitement:',
+                                        ['Options',
+                                        'intake',
+                                        'PERMEAT FILTRATION',
+                                        'APRES FILTRES A CARTOUCHE',
+                                        'PERMEAT RO',
+                                        ])
             filter(uploaded_file,unity,phase)
-        
-        sheets =["intake","QT_PF","QT_après","QT_PRO",
-            "ESLI_PF", "ESLI_après","ESLI_PRO",
-            "ION_PF","ION_après","ION_PRO",
-            "MCT_après","MCT_PRO"]
-
-   
-        container_content1 = """
-        <h3 style='text-align: center;'>Comparaison des phases de traitement: </h3>
-        </div>
-        """
-
-
-        st.sidebar.markdown(container_style + container_content1, unsafe_allow_html=True)
-        #st.sidebar.markdown("<h3 style='text-align: center;'>Comparaison des paramètres dans la même unité: </h3>", unsafe_allow_html=True)
-        data = {}
-        for sheet in sheets:
-            data[sheet] = pd.read_excel(uploaded_file,sheet_name=sheet)
-
-        unity_to_compare = st.sidebar.multiselect('Unité (choisir une seule unité):',
-                                ["QT",
-                                    "ESLI",
-                                    "ION",
-                                    "MCT"])
-        if unity_to_compare == ["MCT"]:
-            phase_to_compare = st.sidebar.multiselect('Phase de traitement (intake a été séléctionné par defaut):',
-                                    [
-                                    'après',
-                                    'PRO'])  
-        else:
-            phase_to_compare = st.sidebar.multiselect('Phase de traitement (intake a été séléctionné par defaut):',
-                                    [
-                                    'PF',
-                                    'après',
-                                    'PRO'])  
-  
-        if phase_to_compare:
-            param_to_compare_intake = st.sidebar.multiselect('paramètres d\'intake:',
-                                    data["intake"].columns[1:])  
-            param_to_compare = {}
-            param_to_compare["intake"] = param_to_compare_intake
-            for i in range(len(unity_to_compare)):  
-                for j in range(len(phase_to_compare)):  
-                    param_to_compare[phase_to_compare[j]] = st.sidebar.multiselect(f'paramètres d\'{phase_to_compare[j]}',
-                                        data[f"{unity_to_compare[i]}_{phase_to_compare[j]}"].columns[1:]) 
-
-        filtrage(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare])           
+            
     except Exception as e:
 
         st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
     
     try:
-        container_content2 = """
-        <h3 style='text-align: center;'>Variation des paramètres en fonction d'autre:</h3>
+        
+        container_content1 = """
+        <h3 style='text-align: center;'>Comparaison des phases de traitement: </h3>
         </div>
-        """
-        st.sidebar.markdown(container_style + container_content2, unsafe_allow_html=True)
-        #st.sidebar.markdown("<h3 style='text-align: center;'>Variation des paramètres en focntion des autres:</h3>", unsafe_allow_html=True)
-        unity_to_compare1 = st.sidebar.selectbox('Unité:',
-                                [
-                                    "options",
+         """
+
+
+        st.sidebar.markdown(container_style + container_content1, unsafe_allow_html=True)
+        #st.sidebar.markdown("<h3 style='text-align: center;'>Comparaison des paramètres dans la même unité: </h3>", unsafe_allow_html=True)
+    
+        phase_to_compare = []
+
+        unity_to_compare = st.sidebar.selectbox('Unité :',
+                                ["options",
                                     "QT",
                                     "ESLI",
                                     "ION",
                                     "MCT"])
-        if unity_to_compare1 == "MCT":
-            phase_to_compare1 = st.sidebar.selectbox('Phase de traitement :',
-                                    [
-                                    "options",
-                                    'après',
-                                    'PRO'])  
-        else:
-            phase_to_compare1 = st.sidebar.selectbox('Phase de traitement :',
-                                    [
-                                    "options",
-                                    'PF',
-                                    'après',
-                                    'PRO'])  
+        if unity_to_compare == "MCT":
+            phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+                                        [
+                                        'intake',
+                                        'APRES FILTRES A CARTOUCHE',
+                                        'PERMEAT RO'])
+        elif  ( unity_to_compare == "QT"):
+            phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+                                        [
+                                        'intake',
+                                        'PERMEAT FILTRATION',
+                                        'APRES FILTRES A CARTOUCHE',
+                                        'PERMEAT RO',
+                                        'sortie_global'])
+        elif (unity_to_compare == "ION"):
+            phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+                                        [
+                                        'intake',
+                                        'PERMEAT FILTRATION',
+                                        'Bac_stockage',
+                                        'APRES FILTRES A CARTOUCHE',
+                                        'PERMEAT RO',
+                                        ])
+        elif(unity_to_compare == "ESLI"):
+            phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+                                        [
+                                        'intake',
+                                        'PERMEAT FILTRATION',
+                                        'APRES FILTRES A CARTOUCHE',
+                                        'PERMEAT RO',
+                                        ])
+            
+        param_to_compare = {}
 
-        if phase_to_compare1:
-            param1 = st.sidebar.selectbox('Abscisse ',
-                                    data[f"{unity_to_compare1}_{phase_to_compare1}"].columns[1:])  
-            param2 = st.sidebar.selectbox('ordonnée ',
-                                    data[f"{unity_to_compare1}_{phase_to_compare1}"].columns[1:])    
-        visualisation_param_en_fonction_dautre(data[f"{unity_to_compare1}_{phase_to_compare1}"],param1,param2)
+        if phase_to_compare:
+            for j in range(len(phase_to_compare)):  
+                param_to_compare[f"{unity_to_compare}_{phase_to_compare[j]}"] = st.sidebar.multiselect(f'paramètres d\'{phase_to_compare[j]}',
+                                    data[f"{unity_to_compare}_{phase_to_compare[j]}"].columns[1:]) 
+
+        filtrage(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare]) 
+       
 
     except Exception as e:
 
         st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
-    
+    # try:
+    #     container_content2 = """
+    #     <h3 style='text-align: center;'>Variation des paramètres en fonction d'autre:</h3>
+    #     </div>
+    #     """
+    #     st.sidebar.markdown(container_style + container_content2, unsafe_allow_html=True)
+    #     #st.sidebar.markdown("<h3 style='text-align: center;'>Variation des paramètres en focntion des autres:</h3>", unsafe_allow_html=True)
+    #     unity_to_compare1 = st.sidebar.selectbox('Unité:',
+    #                             [
+    #                                 "options",
+    #                                 "QT",
+    #                                 "ESLI",
+    #                                 "ION",
+    #                                 "MCT"])
+    #     if unity_to_compare1 == "MCT":
+    #         phase_to_compare1 = st.sidebar.selectbox('Phase de traitement :',
+    #                                 [
+    #                                 "options",
+    #                                 'après',
+    #                                 'PRO'])  
+    #     else:
+    #         phase_to_compare1 = st.sidebar.selectbox('Phase de traitement :',
+    #                                 [
+    #                                 "options",
+    #                                 'PF',
+    #                                 'après',
+    #                                 'PRO'])  
 
+    #     if phase_to_compare1:
+    #         param1 = st.sidebar.selectbox('Abscisse ',
+    #                                 data[f"{unity_to_compare1}_{phase_to_compare1}"].columns[1:])  
+    #         param2 = st.sidebar.selectbox('ordonnée ',
+    #                                 data[f"{unity_to_compare1}_{phase_to_compare1}"].columns[1:])    
+    #     visualisation_param_en_fonction_dautre(data[f"{unity_to_compare1}_{phase_to_compare1}"],param1,param2)
+
+    # except Exception as e:
+
+    #    st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
 else:
     st.markdown('<div class="centered">Veuillez charger un fichier Excel bien adapter pour commencer.</div>', unsafe_allow_html=True)
 

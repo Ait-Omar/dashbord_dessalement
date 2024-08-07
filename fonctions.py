@@ -5,12 +5,94 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
 import random
+from plotly.subplots import make_subplots
+
 
 
 def filter(df,unity,phase):
     #filtrage selon l'unité QT
-    if (unity == "QT") & (phase =="Perméat filtration"):
-        df = pd.read_excel(df,sheet_name="QT_PF")
+    if (unity == "QT") & (phase =="intake"):
+        df = pd.read_excel(df,sheet_name="QT_intake")
+        col1,col2 = st.columns((2))
+        df['date'] = pd.to_datetime(df['date'])
+
+        startDate = pd.to_datetime(df["date"]).min()
+        endDate = pd.to_datetime(df["date"]).max()
+
+        with col1:
+            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+
+        with col2:
+            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
+        df.replace('/', np.nan, inplace=True)
+        df.replace('en cours', np.nan, inplace=True)
+        df['TOC (mg/l)'] = df['TOC (mg/l)'].replace('<3',1)
+        df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
+        df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
+        df.loc[df['TOC (mg/l)'] > 3, 'TOC (mg/l)'] = 0
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>PO43- (mg/l) moyen: {np.around(df['PO43- (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)        
+            fig = px.line(df,x="date",y="PO43- (mg/l)")
+            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=0.1,  # Position Y (sur la ligne horizontale)
+                    text="PO43- doit être inférieur ou égale à 0.1",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>SiO2 (mg/l) moyen: {np.around(df['SiO2 (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="SiO2 (mg/l)")
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>TOC (mg/l) moyenne: {np.around(df['TOC (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="TOC (mg/l)")
+            fig.add_hline(y=1, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=1,  # Position Y (sur la ligne horizontale)
+                    text="TOC doit être égale à 1",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>MES  (mg/l) moyenne: {np.around(df['MES  (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="MES  (mg/l)")
+            fig.add_hline(y=10, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=10,  # Position Y (sur la ligne horizontale)
+                    text="MES doit être inférieur ou égale à 10",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Cl2 libre (mg/l) moyenne: {np.around(df['Cl2 libre (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="Cl2 libre (mg/l)")
+            fig.add_hline(y=0, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=0,  # Position Y (sur la ligne horizontale)
+                    text="Cl2 libre doit être égale à 0",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)     
+    elif (unity == "QT") & (phase =="PERMEAT FILTRATION"):
+        df = pd.read_excel(df,sheet_name="QT_PERMEAT FILTRATION")
         print(df.columns)
         col1,col2 = st.columns((2))
         df['date'] = pd.to_datetime(df['date'])
@@ -84,8 +166,8 @@ def filter(df,unity,phase):
                     ay=-40  # Position Y de la flèche par rapport au texte
                 )
             st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity == "QT") & (phase =="Après filtration à cartouche"):
-        df = pd.read_excel(df,sheet_name="QT_après")
+    elif (unity == "QT") & (phase =="APRES FILTRES A CARTOUCHE"):
+        df = pd.read_excel(df,sheet_name="QT_APRES FILTRES A CARTOUCHE")
         col1,col2 = st.columns((2))
         df['date'] = pd.to_datetime(df['date'])
 
@@ -202,8 +284,8 @@ def filter(df,unity,phase):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)        
-    elif (unity == "QT") & (phase =="Perméat RO"): 
-        df = pd.read_excel(df,sheet_name="QT_PRO")
+    elif (unity == "QT") & (phase =="PERMEAT RO"): 
+        df = pd.read_excel(df,sheet_name="QT_PERMEAT RO")
         col1,col2 = st.columns((2))
         df['date'] = pd.to_datetime(df['date'])
 
@@ -217,6 +299,7 @@ def filter(df,unity,phase):
             date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
+        df.replace('#VALEUR!', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
         with col1:
             st.markdown(F"<h2 style='text-align: center;'>Cond A moyen : {np.around(df['Cond A'].mean(),2)}</h2>", unsafe_allow_html=True)
@@ -442,10 +525,164 @@ def filter(df,unity,phase):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
+    elif (unity == "QT") & (phase =="QT_sortie_global"):
+        df = pd.read_excel(df,sheet_name="QT_sortie_global")
+        col1,col2 = st.columns((2))
+        df['date'] = pd.to_datetime(df['date'])
+
+        startDate = pd.to_datetime(df["date"]).min()
+        endDate = pd.to_datetime(df["date"]).max()
+
+        with col1:
+            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+
+        with col2:
+            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
+        df.replace('/', np.nan, inplace=True)
+        df.replace('en cours', np.nan, inplace=True)
+
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>pH moyen: {np.around(df['pH'].mean(),2)}</h2>", unsafe_allow_html=True)        
+            fig = px.line(df,x="date",y="pH")
+            fig.add_hline(y=5.4, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=5.4,  # Position Y (sur la ligne horizontale)
+                        text="pH doit être supérieur à 5.4",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>Cond. (mS/cm) à 25° C moyen: {np.around(df['Cond. (mS/cm) à 25° C'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="Cond. (mS/cm) à 25° C")
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond A doit être inférieure à 450",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Turb (NTU) moyenne: {np.around(df['Turb (NTU)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="Turb (NTU)")
+            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=0.1,  # Position Y (sur la ligne horizontale)
+                        text="Turb doit être inférieure à 0.1",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>TDS (mg/l) moyenne: {np.around(df['TDS (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="TDS (mg/l)")
+            fig.add_hline(y=310, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=310,  # Position Y (sur la ligne horizontale)
+                        text="TDS doit être inférieure à 310",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200) 
 
     #filtrage selon l'unité ESLI
-    if (unity == "ESLI") & (phase =="Perméat filtration"):
-        df = pd.read_excel(df,sheet_name="ESLI_PF")
+    elif (unity == "ESLI") & (phase =="intake"):
+        df = pd.read_excel(df,sheet_name="ESLI_intake")
+        print(df.columns)
+        col1,col2 = st.columns((2))
+        df['date'] = pd.to_datetime(df['date'])
+
+        startDate = pd.to_datetime(df["date"]).min()
+        endDate = pd.to_datetime(df["date"]).max()
+
+        with col1:
+            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+
+        with col2:
+            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
+        df.replace('/', np.nan, inplace=True)
+        df.replace('en cours', np.nan, inplace=True)
+        df['TOC (mg/l)'] = df['TOC (mg/l)'].replace('<3',1)
+        df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
+        df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
+        df.loc[df['TOC (mg/l)'] > 3, 'TOC (mg/l)'] = 0
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>PO43- (mg/l) moyen: {np.around(df['PO43- (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)        
+            fig = px.line(df,x="date",y="PO43- (mg/l)")
+            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=0.1,  # Position Y (sur la ligne horizontale)
+                    text="PO43- doit être inférieur ou égale à 0.1",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>SiO2 (mg/l) moyen: {np.around(df['SiO2 (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="SiO2 (mg/l)")
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>TOC (mg/l) moyenne: {np.around(df['TOC (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="TOC (mg/l)")
+            fig.add_hline(y=1, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=1,  # Position Y (sur la ligne horizontale)
+                    text="TOC doit être égale à 1",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>MES  (mg/l) moyenne: {np.around(df['MES  (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="MES  (mg/l)")
+            fig.add_hline(y=10, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=10,  # Position Y (sur la ligne horizontale)
+                    text="MES doit être inférieur ou égale à 10",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Cl2 libre (mg/l) moyenne: {np.around(df['Cl2 libre (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="Cl2 libre (mg/l)")
+            fig.add_hline(y=0, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=0,  # Position Y (sur la ligne horizontale)
+                    text="Cl2 libre doit être égale à 0",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)     
+    elif (unity == "ESLI") & (phase =="PERMEAT FILTRATION"):
+        df = pd.read_excel(df,sheet_name="ESLI_PERMEAT FILTRATION")
         col1,col2, = st.columns((2))
         df['date'] = pd.to_datetime(df['date'])
 
@@ -630,8 +867,8 @@ def filter(df,unity,phase):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity == "ESLI") & (phase =="Après filtration à cartouche"):
-        df = pd.read_excel(df,sheet_name="ESLI_après")
+    elif (unity == "ESLI") & (phase =="APRES FILTRES A CARTOUCHE"):
+        df = pd.read_excel(df,sheet_name="ESLI_APRES FILTRES A CARTOUCHE")
         print(df.columns)
         col1,col2 = st.columns((2))
         df['date'] = pd.to_datetime(df['date'])
@@ -868,8 +1105,8 @@ def filter(df,unity,phase):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity == "ESLI") & (phase =="Perméat RO"):
-        df = pd.read_excel(df,sheet_name="ESLI_PRO")
+    elif (unity == "ESLI") & (phase =="PERMEAT RO"):
+        df = pd.read_excel(df,sheet_name="ESLI_PERMEAT RO")
         col1,col2 = st.columns((2))
         df['date'] = pd.to_datetime(df['date'])
 
@@ -883,6 +1120,7 @@ def filter(df,unity,phase):
             date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
+        df.replace('#VALEUR!', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond A1 moyen : {np.around(pd.to_numeric(df['Cond A1'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
@@ -1221,8 +1459,89 @@ def filter(df,unity,phase):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
     #filtrage selon l'unité ION EXCHANGE
-    if (unity == "ION EXCHANGE") & (phase =="Perméat filtration"):
-        df = pd.read_excel(df,sheet_name="ION_PF")
+    elif (unity == "ION EXCHANGE") & (phase =="intake"):
+        df = pd.read_excel(df,sheet_name="ION_intake")
+        print(df.columns)
+        col1,col2 = st.columns((2))
+        df['date'] = pd.to_datetime(df['date'])
+
+        startDate = pd.to_datetime(df["date"]).min()
+        endDate = pd.to_datetime(df["date"]).max()
+
+        with col1:
+            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+
+        with col2:
+            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
+        df.replace('/', np.nan, inplace=True)
+        df.replace('en cours', np.nan, inplace=True)
+        df['TOC (mg/l)'] = df['TOC (mg/l)'].replace('<3',1)
+        df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
+        df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
+        df.loc[df['TOC (mg/l)'] > 3, 'TOC (mg/l)'] = 0
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>PO43- (mg/l) moyen: {np.around(df['PO43- (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)        
+            fig = px.line(df,x="date",y="PO43- (mg/l)")
+            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=0.1,  # Position Y (sur la ligne horizontale)
+                    text="PO43- doit être inférieur ou égale à 0.1",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>SiO2 (mg/l) moyen: {np.around(df['SiO2 (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="SiO2 (mg/l)")
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>TOC (mg/l) moyenne: {np.around(df['TOC (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="TOC (mg/l)")
+            fig.add_hline(y=1, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=1,  # Position Y (sur la ligne horizontale)
+                    text="TOC doit être égale à 1",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>MES  (mg/l) moyenne: {np.around(df['MES  (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="MES  (mg/l)")
+            fig.add_hline(y=10, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=10,  # Position Y (sur la ligne horizontale)
+                    text="MES doit être inférieur ou égale à 10",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Cl2 libre (mg/l) moyenne: {np.around(df['Cl2 libre (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="Cl2 libre (mg/l)")
+            fig.add_hline(y=0, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=0,  # Position Y (sur la ligne horizontale)
+                    text="Cl2 libre doit être égale à 0",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)     
+    elif (unity == "ION EXCHANGE") & (phase =="PERMEAT FILTRATION"):
+        df = pd.read_excel(df,sheet_name="ION_PERMEAT FILTRATION")
         col1,col2, = st.columns((2))
         df['date'] = pd.to_datetime(df['date'])
 
@@ -1531,8 +1850,69 @@ def filter(df,unity,phase):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity == "ION EXCHANGE") & (phase =="Après filtration à cartouche"):
-        df = pd.read_excel(df,sheet_name="ION_après")
+    elif (unity == "ION EXCHANGE") & (phase =="ION_Bac_stockage"):
+        df = pd.read_excel(df,sheet_name="ION_Bac_stockage")
+        print(df.columns)
+        col1,col2 = st.columns((2))
+        df['date'] = pd.to_datetime(df['date'])
+
+        startDate = pd.to_datetime(df["date"]).min()
+        endDate = pd.to_datetime(df["date"]).max()
+
+        with col1:
+            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+
+        with col2:
+            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
+        df.replace('/', np.nan, inplace=True)
+        df.replace('en cours', np.nan, inplace=True)
+        df['TOC (mg/l)'] = df['TOC (mg/l)'].replace('<3',1)
+        df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
+        df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
+        df.loc[df['TOC (mg/l)'] > 3, 'TOC (mg/l)'] = 0
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>pH moyen : {np.around(pd.to_numeric(df['pH'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='pH')
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>Turb (NTU) moyen : {np.around(pd.to_numeric(df['Turb (NTU)'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='Turb (NTU)')
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Fe2+ (mg/l) moyen : {np.around(pd.to_numeric(df['Fe2+ (mg/l)'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='Fe2+ (mg/l)')
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>Fe3+ (mg/l) moyen : {np.around(pd.to_numeric(df['Fe3+ (mg/l)'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='Fe3+ (mg/l)')
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>TOC (mg/l) moyen : {np.around(pd.to_numeric(df['TOC (mg/l)'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='TOC (mg/l)')
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>SiO2 (mg/l) moyen : {np.around(pd.to_numeric(df['SiO2 (mg/l)'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='SiO2 (mg/l)')
+            st.plotly_chart(fig,use_container_width=True,height = 200) 
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>PO43- (mg/l) moyen : {np.around(pd.to_numeric(df['PO43- (mg/l)'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='PO43- (mg/l)')
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>Cl2 libre (mg/l) moyen : {np.around(pd.to_numeric(df['Cl2 libre (mg/l)'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='Cl2 libre (mg/l)')
+            st.plotly_chart(fig,use_container_width=True,height = 200)  
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>TDS (mg/l) moyen : {np.around(pd.to_numeric(df['TDS (mg/l)'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='TDS (mg/l)')
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>SDI15 moyen : {np.around(pd.to_numeric(df['SDI15'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y='SDI15')
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+    elif (unity == "ION EXCHANGE") & (phase =="APRES FILTRES A CARTOUCHE"):
+        df = pd.read_excel(df,sheet_name="ION_APRES FILTRES A CARTOUCHE")
         col1,col2 = st.columns((2))
         df['date'] = pd.to_datetime(df['date'])
 
@@ -1624,8 +2004,8 @@ def filter(df,unity,phase):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity == "ION EXCHANGE") & (phase =="Perméat RO"):
-        df = pd.read_excel(df,sheet_name="ION_PRO")
+    elif (unity == "ION EXCHANGE") & (phase =="PERMEAT RO"):
+        df = pd.read_excel(df,sheet_name="ION_PERMEAT RO")
         col1,col2 = st.columns((2))
         df['date'] = pd.to_datetime(df['date'])
 
@@ -1639,6 +2019,7 @@ def filter(df,unity,phase):
             date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
+        df.replace('#VALEUR!', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond A moyen : {np.around(pd.to_numeric(df['Cond A'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
@@ -1866,6 +2247,87 @@ def filter(df,unity,phase):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
     # filtrage selon l'unité MCT
+    elif (unity == "MCT") & (phase =="intake"):
+        df = pd.read_excel(df,sheet_name="MCT_intake")
+        print(df.columns)
+        col1,col2 = st.columns((2))
+        df['date'] = pd.to_datetime(df['date'])
+
+        startDate = pd.to_datetime(df["date"]).min()
+        endDate = pd.to_datetime(df["date"]).max()
+
+        with col1:
+            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+
+        with col2:
+            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
+        df.replace('/', np.nan, inplace=True)
+        df.replace('en cours', np.nan, inplace=True)
+        df['TOC (mg/l)'] = df['TOC (mg/l)'].replace('<3',1)
+        df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
+        df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
+        df.loc[df['TOC (mg/l)'] > 3, 'TOC (mg/l)'] = 0
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>PO43- (mg/l) moyen: {np.around(df['PO43- (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)        
+            fig = px.line(df,x="date",y="PO43- (mg/l)")
+            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=0.1,  # Position Y (sur la ligne horizontale)
+                    text="PO43- doit être inférieur ou égale à 0.1",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>SiO2 (mg/l) moyen: {np.around(df['SiO2 (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="SiO2 (mg/l)")
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>TOC (mg/l) moyenne: {np.around(df['TOC (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="TOC (mg/l)")
+            fig.add_hline(y=1, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=1,  # Position Y (sur la ligne horizontale)
+                    text="TOC doit être égale à 1",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col2:
+            st.markdown(f"<h2 style='text-align: center;'>MES  (mg/l) moyenne: {np.around(df['MES  (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="MES  (mg/l)")
+            fig.add_hline(y=10, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=10,  # Position Y (sur la ligne horizontale)
+                    text="MES doit être inférieur ou égale à 10",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>Cl2 libre (mg/l) moyenne: {np.around(df['Cl2 libre (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="Cl2 libre (mg/l)")
+            fig.add_hline(y=0, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                    y=0,  # Position Y (sur la ligne horizontale)
+                    text="Cl2 libre doit être égale à 0",  # Texte de l'annotation
+                    showarrow=True,  # Afficher une flèche pointant vers le point
+                    arrowhead=2,  # Type de flèche
+                    ax=0,  # Position X de la flèche par rapport au texte
+                    ay=-40  # Position Y de la flèche par rapport au texte
+                )
+            st.plotly_chart(fig,use_container_width=True,height = 200)     
     elif (unity == "MCT") & (phase =="Après filtration à cartouche"):
         df = pd.read_excel(df, sheet_name="MCT_après")
         df['date'] = pd.to_datetime(df['date'])
@@ -2307,8 +2769,8 @@ def filter(df,unity,phase):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)   
-    elif (unity == "MCT") & (phase =="Perméat RO"): 
-        df = pd.read_excel(df,sheet_name="MCT_PRO")
+    elif (unity == "MCT") & (phase =="PERMEAT RO"): 
+        df = pd.read_excel(df,sheet_name="MCT_PERMEAT RO")
         print(df.columns)
         col1,col2 = st.columns((2))
         df['date'] = pd.to_datetime(df['date'])
@@ -2323,6 +2785,7 @@ def filter(df,unity,phase):
             date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
+        df.replace('#VALEUR!', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond LIGNE 1 moyen: {np.around(pd.to_numeric(df['Cond LIGNE 1'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
@@ -2438,642 +2901,107 @@ def filter(df,unity,phase):
                         ax=0,  # Position X de la flèche par rapport au texte
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-
-    elif(phase == "intake"):
-        df = pd.read_excel(df,sheet_name="intake")
-        print(df.columns)
-        col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-        df.replace('/', np.nan, inplace=True)
-        df.replace('en cours', np.nan, inplace=True)
-        df['TOC (mg/l)'] = df['TOC (mg/l)'].replace('<3',1)
-        df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
-        df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
-        df.loc[df['TOC (mg/l)'] > 3, 'TOC (mg/l)'] = 0
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>PO43- (mg/l) moyen: {np.around(df['PO43- (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)        
-            fig = px.line(df,x="date",y="PO43- (mg/l)")
-            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
-            fig.add_annotation(
-                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                    y=0.1,  # Position Y (sur la ligne horizontale)
-                    text="PO43- doit être inférieur ou égale à 0.1",  # Texte de l'annotation
-                    showarrow=True,  # Afficher une flèche pointant vers le point
-                    arrowhead=2,  # Type de flèche
-                    ax=0,  # Position X de la flèche par rapport au texte
-                    ay=-40  # Position Y de la flèche par rapport au texte
-                )
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>SiO2 (mg/l) moyen: {np.around(df['SiO2 (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="SiO2 (mg/l)")
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>TOC (mg/l) moyenne: {np.around(df['TOC (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="TOC (mg/l)")
-            fig.add_hline(y=1, line_dash="dash", line_color="red", line_width=2)
-            fig.add_annotation(
-                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                    y=1,  # Position Y (sur la ligne horizontale)
-                    text="TOC doit être égale à 1",  # Texte de l'annotation
-                    showarrow=True,  # Afficher une flèche pointant vers le point
-                    arrowhead=2,  # Type de flèche
-                    ax=0,  # Position X de la flèche par rapport au texte
-                    ay=-40  # Position Y de la flèche par rapport au texte
-                )
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>MES  (mg/l) moyenne: {np.around(df['MES  (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="MES  (mg/l)")
-            fig.add_hline(y=10, line_dash="dash", line_color="red", line_width=2)
-            fig.add_annotation(
-                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                    y=10,  # Position Y (sur la ligne horizontale)
-                    text="MES doit être inférieur ou égale à 10",  # Texte de l'annotation
-                    showarrow=True,  # Afficher une flèche pointant vers le point
-                    arrowhead=2,  # Type de flèche
-                    ax=0,  # Position X de la flèche par rapport au texte
-                    ay=-40  # Position Y de la flèche par rapport au texte
-                )
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Cl2 libre (mg/l) moyenne: {np.around(df['Cl2 libre (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Cl2 libre (mg/l)")
-            fig.add_hline(y=0, line_dash="dash", line_color="red", line_width=2)
-            fig.add_annotation(
-                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                    y=0,  # Position Y (sur la ligne horizontale)
-                    text="Cl2 libre doit être égale à 0",  # Texte de l'annotation
-                    showarrow=True,  # Afficher une flèche pointant vers le point
-                    arrowhead=2,  # Type de flèche
-                    ax=0,  # Position X de la flèche par rapport au texte
-                    ay=-40  # Position Y de la flèche par rapport au texte
-                )
-            st.plotly_chart(fig,use_container_width=True,height = 200)      
-def rendement_mes(data):
-    Mes_QT = ((data['QT_avant']['MES']-data['QT_PF']['MES'])/data['QT_avant']['MES']).mean()*100
-    Mes_ESLI = ((data['ESLI_avant']['MES']-data['ESLI_PF']['MES'])/data['ESLI_avant']['MES']).mean()*100
-    Mes_ION = ((data['ION_avant']['MES (mg/l)']-data['ION_PF']['MES (mg/l)'])/data['ION_avant']['MES (mg/l)']).mean()*100
-
-    np.random.seed(42)
-    rd =[Mes_QT,Mes_ESLI,Mes_ION]
-    data = {
-        'unity': ["QT","ESLI","ION"],
-        'Yield': rd
-    }
-    df = pd.DataFrame(data)
-
-
-    # Sélection des catégories à afficher dans le pie chart
-    selected_categories = st.multiselect('Sélectionnez les Unité à inclure dans le graphique :', options=df['unity'].unique(), default=df['unity'].unique())
-
-    # Filtre les données en fonction des catégories sélectionnées
-    filtered_df = df[df['unity'].isin(selected_categories)]
-
-    # Crée le pie chart avec Plotly
-    fig = px.pie(filtered_df, names='unity', values='Yield', title='Répartition des valeurs par catégorie')
-    fig.update_layout(title={'text': 'Répartition des rendements par unity', 'x': 0.36})
-# Affiche le pie chart avec Streamlit
-    st.plotly_chart(fig)
-def rendement_PO43(data):
-    po4_QT = (data['QT_après']['PO43-'].mean())
-    po4_ESLI = (data['ESLI_après']['PO43-'].mean())
-    po4_ION = (data['ION_après']['PO43-'].mean())
-
-    np.random.seed(42)
-    rd =[po4_QT,po4_ESLI,po4_ION]
-    data = {
-        'unity': ["QT","ESLI","ION"],
-        'Yield': rd
-    }
-    df = pd.DataFrame(data)
-
-
-    # Sélection des catégories à afficher dans le pie chart
-    selected_categories = st.multiselect('Sélectionnez les Unité à inclure dans le graphique :', options=df['unity'].unique(), default=df['unity'].unique())
-
-    # Filtre les données en fonction des catégories sélectionnées
-    filtered_df = df[df['unity'].isin(selected_categories)]
-
-    # Crée le pie chart avec Plotly
-    fig = px.pie(filtered_df, names='unity', values='Yield', title='Répartition des valeurs par catégorie')
-    fig.update_layout(title={'text': 'Répartition des rendements par unity', 'x': 0.36})
-# Affiche le pie chart avec Streamlit
-    st.plotly_chart(fig)
-def rendement_Turb(data):
-    Turb_QT = ((data['QT_avant']['Turb']-data['QT_PRO']['Turb'])/data['QT_avant']['Turb']).mean()
-    Turb_ESLI = ((data['ESLI_avant']['Turb']-data['ESLI_PRO']['Turb'])/data['ESLI_avant']['Turb']).mean()
-    Turb_ION_ABCDE = ((data['ION_avant']['Turb (NTU)Entrée A,B,C,D,E']-data['ION_PRO']['Turb'])/data['ION_avant']['Turb (NTU)Entrée A,B,C,D,E']).mean()
-    Turb_ION_FGHIJ = ((data['ION_avant']['Turb (NTU)Entrée F,G,H,I,J']-data['ION_PRO']['Turb'])/data['ION_avant']['Turb (NTU)Entrée F,G,H,I,J']).mean()
-    np.random.seed(42)
-    rd =[Turb_QT,Turb_ESLI,Turb_ION_ABCDE,Turb_ION_FGHIJ]
-    data = {
-        'unity': ["QT","ESLI","Turb_ION_ABCDE","Turb_ION_FGHIJ"],
-        'Yield': rd
-    }
-    df = pd.DataFrame(data)
-
-
-    # Sélection des catégories à afficher dans le pie chart
-    selected_categories = st.multiselect('Sélectionnez les Unité à inclure dans le graphique :', options=df['unity'].unique(), default=df['unity'].unique())
-
-    # Filtre les données en fonction des catégories sélectionnées
-    filtered_df = df[df['unity'].isin(selected_categories)]
-
-    # Crée le pie chart avec Plotly
-    fig = px.pie(filtered_df, names='unity', values='Yield', title='Répartition des valeurs par catégorie')
-    fig.update_layout(title={'text': 'Répartition des rendements par unity', 'x': 0.36})
-# Affiche le pie chart avec Streamlit
-    st.plotly_chart(fig)
-def compare(unity):
-    #filtrage selon l'unité QT
-    if (unity[0] == ["QT"]) & (unity[1]==["Avant filtraion fine"]):
-        df = pd.read_excel('DATA/data préparé.xlsx',sheet_name="QT_avant")
-
-        col1,col2, = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-       
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-        if unity[2] == ["pH"]:
-            st.markdown(f"<h2 style='text-align: center;'>pH moyen: {np.around(df['pH'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.bar(df,x="date",y="pH")
-            fig.add_hline(y=8, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        if unity[2] == ["Turb"]:
-            st.markdown(f"<h2 style='text-align: center;'>Turbidité moyenne: {np.around(df['Turb'].mean(),2)} NTU</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Turb")
-            fig.add_hline(y=5.13, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        if unity[2] == "Cond":
-            st.markdown(f"<h2 style='text-align: center;'>Condectivté moyenne: {np.around(df['Cond. (mS/cm) à 25° C'].mean(),2)} mS/cm</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Cond. (mS/cm) à 25° C")
-            fig.add_hline(y=55, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        if unity[2] == "MES":
-            st.markdown(f"<h2 style='text-align: center;'>MES moyen: {np.around(df['MES'].mean(),2)} mg/l</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="MES")
-            fig.add_hline(y=10, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity[0] == "QT") & (unity[1] =="Perméat filtration"):
-        df = pd.read_excel('DATA/data préparé.xlsx',sheet_name="QT_PF")
-
-        col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>SDI 15 P1 moyen: {np.around(df['SDI 15 P1'].mean(),2)}</h2>", unsafe_allow_html=True)        
-            fig = px.line(df,x="date",y="SDI 15 P1")
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>SDI 15 P2 moyen: {np.around(df['SDI 15 P2'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="SDI 15 P2")
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Turb P1 moyenne: {np.around(df['Turb P1'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Turb P1")
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>Turb P2 moyenne: {np.around(df['Turb P1'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Turb P2")
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>MES moyenne: {np.around(df['MES'].mean(),2)} mg/l</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="MES")
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity[0] == "QT") & (unity[1] =="Après filtration à cartouche"):
-        df = pd.read_excel('DATA/data préparé.xlsx', sheet_name="QT_après")
-        df['date'] = pd.to_datetime(df['date'])
-
-        # Définir les dates minimales et maximales
-        startDate = df['date'].min()
-        endDate = df['date'].max()
-
-        # Créer les colonnes pour la sélection des dates
-        col1, col2 = st.columns(2)
-
-        with col1:
-            date1 = st.date_input("Start Date", startDate)
-
-        with col2:
-            date2 = st.date_input("End Date", endDate)
-
-        # Filtrer les données en fonction des dates sélectionnées
-        df = df[(df['date'] >= pd.to_datetime(date1)) & (df['date'] <= pd.to_datetime(date2))]
-
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>pH moyen: {np.around(df['pH'].mean(), 2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="pH")
-            fig.add_hline(y=8, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-
-  
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>Turb moyenne: {np.around(df['Turb'].mean(), 2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Turb")
-            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-
-        # Visualiser PO43- avec coloration conditionnelle
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>PO43-: {np.around(df['PO43-'].mean(), 2)} mg/l</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="PO43-")
-            fig.add_hline(y=0, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-
-        # Visualiser SDI15 avec coloration conditionnelle
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>SDI15 moyen: {np.around(df['SDI15'].mean(), 2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="SDI15")
-            fig.add_hline(y=2.5, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-
-        # Visualiser TDS avec coloration conditionnelle
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>TDS moyen: {np.around(df['TDS'].mean(), 2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="TDS")
-            fig.add_hline(y=40000, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity[0] == "QT") & (unity[1] =="Perméat RO"): 
-        df = pd.read_excel('DATA/data préparé.xlsx',sheet_name="QT_PRO")
-        print(df.columns)
-        col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-        with col1:
-            st.markdown("<h2 style='text-align: center;'>Cond </h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y=['Cond. (µS/cm) A','Cond. (µS/cm) B',
-            'Cond. (µS/cm) C', 'Cond. (µS/cm) D', 'Cond. (µS/cm) E',
-            'Cond. (µS/cm) F', 'Cond. (µS/cm) G', ' Cond. (µS/cm) H'])
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>pH moyen: {np.around(df['pH'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="pH")
-            fig.add_hline(y=5.4, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Turb moyenne: {np.around(df['Turb'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Turb")
-            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-    #filtrage selon l'unité ESLI
-    elif (unity[0] == "ESLI") & (unity[1] =="Avant filtraion fine"):
-        df = pd.read_excel('DATA/data préparé.xlsx',sheet_name="ESLI_avant")
-
-        col1,col2, = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>pH moyen: {np.around(df['pH'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="pH")
-            fig.add_hline(y=8, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>Turb moyenne: {np.around(df['Turb'].mean(),2)} </h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Turb")
-            fig.add_hline(y=5.13, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Fe3+ moyenne: {np.around(df['MES'].mean(),2)} mg/l</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Fe3+")
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>MES: {np.around(df['MES'].mean(),2)} mg/l</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="MES")
-            fig.add_hline(y=10, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity[0] == "ESLI") & (unity[1] =="Perméat filtration"):
-        df = pd.read_excel('DATA/data préparé.xlsx',sheet_name="ESLI_PF")
-        col1,col2, = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-        st.markdown("<h2 style='text-align: center;'>SDI15</h2>", unsafe_allow_html=True)
-        fig = px.line(df,x="date",y=['SDI 15 ZONE A',' SDI 15 Zone B', 'SDI 15 Zone C'])
-        st.plotly_chart(fig,use_container_width=True,height = 200)
-
-        st.markdown("<h2 style='text-align: center;'>Turb</h2>", unsafe_allow_html=True)
-        fig = px.line(df,x="date",y=['Turb Zone A','Turb Zone B','Turb Zone C'])
-        st.plotly_chart(fig,use_container_width=True,height = 200)
-    
-        st.markdown(f"<h2 style='text-align: center;'>MES moyenne: {np.around(df['MES'].mean(),2)} mg/l</h2>", unsafe_allow_html=True)
-        fig = px.line(df,x="date",y="MES")
-        st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity[0] == "ESLI") & (unity[1] =="Après filtration à cartouche"):
-        df = pd.read_excel('DATA/data préparé.xlsx',sheet_name="ESLI_après")
-        col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>pH moyen: {np.around(df['pH'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="pH")
-            fig.add_hline(y=8, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>Cond moyenne: {np.around(df['Cond'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Cond")
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Turb moyenne: {np.around(df['Turb'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Turb")
-            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>PO43- moyen: {np.around(df['PO43-'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="PO43-")
-            fig.add_hline(y=0.0, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>SDI15 moyen: {np.around(df['SDI15'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="SDI15")
-            fig.add_hline(y=2.5, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>TDS moyenne: {np.around(df['TDS'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="TDS")
-            fig.add_hline(y=40000, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity[0] == "ESLI") & (unity[1] =="Perméat RO"):
-        df = pd.read_excel('DATA/data préparé.xlsx',sheet_name="ESLI_PRO")
-        col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-        st.markdown("<h2 style='text-align: center;'>Cond</h2>", unsafe_allow_html=True)
-        fig = px.line(df,x="date",y=['Cond. (µS/cm) A1','Cond. (µS/cm) A2',
-       'Cond. (µS/cm) A3', 'Cond. (µS/cm) A4', 'Cond. (µS/cm) B1',
-       'Cond. (µS/cm) B2', 'Cond. (µS/cm) B3', 'Cond. (µS/cm) B4',
-       'Cond. (µS/cm) C1', 'Cond. (µS/cm) C2', 'Cond. (µS/cm) C3',
-       'Cond. (µS/cm) C4'])
-        fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
-        st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>pH moyen: {np.around(df['pH'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="pH")
-            fig.add_hline(y=5.4, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>Turb moyenne: {np.around(df['Turb'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Turb")
-            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-    #filtrage selon l'unité ION EXCHANGE
-    elif (unity[0] == "ION EXCHANGE") & (unity[1] =="Avant filtraion fine"):
-        df = pd.read_excel('DATA/data préparé.xlsx',sheet_name="ION_avant")
-        col1,col2, = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-        with col1:
-            st.markdown("<h2 style='text-align: center;'>pH</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y=['pH Entrée A,B,C,D,E', 'pH Entrée F,G,H,I,J'])
-            fig.add_hline(y=8, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown("<h2 style='text-align: center;'>Turb</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y=['Turb (NTU)Entrée A,B,C,D,E', 'Turb (NTU)Entrée F,G,H,I,J'])
-            fig.add_hline(y=5.13, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown("<h2 style='text-align: center;'>Fe2+</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y=['Fe2+ (mg/l)Entrée A,B,C,D,E', 'Fe2+ (mg/l)Entrée F,G,H,I,J'])
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown("<h2 style='text-align: center;'>Fe3+</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y=['Fe3+ (mg/l)Entrée A,B,C,D,E', 'Fe3+ (mg/l)Entrée F,G,H,I,J'])
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>MES moyenne: {np.around(df['MES (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="MES (mg/l)")
-            fig.add_hline(y=10, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity[0] == "ION EXCHANGE") & (unity[1] =="Perméat filtration"):
-        df = pd.read_excel('DATA/data préparé.xlsx',sheet_name="ION_PF")
-        col1,col2, = st.columns((2))
-        df['date'] = pd.to_datetime(df['DATE'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-
-        st.markdown("<h2 style='text-align: center;'>Turb</h2>", unsafe_allow_html=True)
-        fig = px.line(df,x="date",y=['Turb Collecteur ', 'Turb HMMF \nA', 'Turb HMMF \nB', 'Turb HMMF \nC',
-       'Turb HMMF \nD', 'Turb HMMF \nE', 'Turb HMMF \nF', 'Turb HMMF \nG',
-       'Turb HMMF \nH', 'Turb HMMF \nI', 'Turb HMMF \nJ'])
-        st.plotly_chart(fig,use_container_width=True,height = 200)
-
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Fe3+ moyenne:{np.around(df['Fe3+ (mg/l)'].mean(),2)} mg/l </h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Fe3+ (mg/l)")
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>MES moyenne: {np.around(df['MES (mg/l)'].mean(),2)} mg/l</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="MES (mg/l)")
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity[0] == "ION EXCHANGE") & (unity[1] =="Après filtration à cartouche"):
-        df = pd.read_excel('DATA/data préparé.xlsx',sheet_name="ION_après")
-        col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>pH moyen: {np.around(df['pH'].mean(),2)} </h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="pH")
-            fig.add_hline(y=8, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(F"<h2 style='text-align: center;'>Turb moyenne: {np.around(df['Turb'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Turb")
-            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-            
-        with col1:
-            st.markdown(F"<h2 style='text-align: center;'>PO43- moyen: {np.around(df['PO43-'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="PO43-")
-            fig.add_hline(y=0.0, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(F"<h2 style='text-align: center;'>TDS moyenne: {np.around(df['TDS'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="TDS")
-            fig.add_hline(y=40000, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col1:
-            st.markdown("<h2 style='text-align: center;'>SDI15</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y=['SDI15 A,B,C,D', 'SDI15 E,F,G,H'])
-            fig.add_hline(y=2.5, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown("<h2 style='text-align: center;'>Fe3+</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y=['Fe3+ (mg/l) A,B,C,D', 'Fe3+ (mg/l) E,F,G,H'])
             st.plotly_chart(fig,use_container_width=True,height = 200)            
-    elif (unity[0] == "ION EXCHANGE") & (unity[1] =="Perméat RO"):
-        df = pd.read_excel('DATA/data préparé.xlsx',sheet_name="ION_PRO")
-        col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
-
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
-
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
-        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
-        with col1:
-            st.markdown(f"<h2 style='text-align: center;'>pH moyen: {np.around(df['pH'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="pH")
-            fig.add_hline(y=5.4, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)
-        with col2:
-            st.markdown(f"<h2 style='text-align: center;'>Turb moyenne: {np.around(df['Turb'].mean(),2)}</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="Turb")
-            fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
-            st.plotly_chart(fig,use_container_width=True,height = 200)  
-        st.markdown("<h2 style='text-align: center;'>Cond</h2>", unsafe_allow_html=True)
-        fig = px.line(df,x="date",y=['Cond. (µS/cm) A', 'Cond. (µS/cm) B',
-        'Cond. (µS/cm) C', 'Cond. (µS/cm) D', 'Cond. (µS/cm) E',
-        'Cond. (µS/cm) F', 'Cond. (µS/cm) G', 'Cond. (µS/cm) H'])
-        fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
-        st.plotly_chart(fig,use_container_width=True,height = 200)             
 def filtrage(t,data):
     df ={}
     params = data[2]
-    for i in range(len(data[0])):
-        for j in range(len(data[1])):
-            df[f"{data[1][j]}"] = pd.read_excel(t,sheet_name=f"{data[0][i]}_{data[1][j]}")
-    df['intake'] = pd.read_excel(t,sheet_name="intake")
+    for j in range(len(data[1])):
+        df[f"{data[0]}_{data[1][j]}"] = pd.read_excel(t,sheet_name=f"{data[0]}_{data[1][j]}")
 
-    date1 = pd.to_datetime(st.date_input("Date"))
-    Variation_param_pendant_phase(df,params,date1)   
-def Variation_param_pendant_phase(df,params,date1):
-        
-        for k in df.keys():
-            df[k]['date'] = pd.to_datetime(df[k]['date'])
-            df[k] = df[k][df[k]["date"] == date1]
-            df[k].replace('/', np.nan, inplace=True)
-            df[k].replace('en cours', np.nan, inplace=True) 
-         
-        x1 =[]
-        x2 = []
+    c = f"{data[0]}_{data[1][0]}"
+    col1,col2 = st.columns((2))
+    startDate = pd.to_datetime(df[c]["date"]).min()
+    endDate = pd.to_datetime(df[c]["date"]).max() 
+    
+    with col1:
+        date1 = pd.to_datetime(st.date_input("Start Date: ", startDate))
 
-        for param, value in params.items():
+    with col2:
+        date2 = pd.to_datetime(st.date_input("End Date: ", endDate))   
+    Variation_param_pendant_phase(df,params,date1,date2,c)   
+def Variation_param_pendant_phase(df,params,date1,date2,c):
+    for k in df.keys():
+        df[k]['date'] = pd.to_datetime(df[k]['date'])
+        df[k] = df[k][(df[k]["date"] >= date1) & (df[k]["date"] <= date2)]
+        df[k].replace('/', np.nan, inplace=True)
+        df[k].replace('#VALEUR!', np.nan, inplace=True)
+        df[k].replace('en cours', np.nan, inplace=True) 
+    df1 = {'date':df[c]["date"]}
+    legend = []
+    for data, value in params.items():
             if value:
-                   for i in params[param]:
-                        print(i)
-                        x1.append(float(df[param][i].mean()))
-                        x2.append(f"{[i][0]}_{param}") 
-  
+                for param in params[data]:
+                    df1[f"{param}_{data}"] = df[data][param]
+                    legend.append(f"{param}_{data}")
+                    title = param            
+    df1 = pd.DataFrame(df1)
 
-        #colors = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA']  
-        colors = generate_hex_colors(len(params)) 
-        fig = go.Figure(data=[go.Bar(x=x2, y=x1, marker_color=colors, text=x1, textposition='outside')])
-        fig.update_layout(
-            title={'text': f"Variation de {params[param][0]}", 'x': 0.36},
-            height=400,  # Ajustez la hauteur ici
-            margin=dict(l=400, r=400, t=40, b=40),
-            bargap=0.7   # Ajustez l'espace entre les barres
+    if (df1.columns[1][:4] != df1.columns[2][:4] ):
+        col1,col2 = st.columns((2))
+        with col1:
+            selected_color1 = st.color_picker(f'Choisissez le couleur de {df1.columns[1][:4]}', '#095DBA')
+        with col2:
+            selected_color2 = st.color_picker(f'Choisissez le couleur de {df1.columns[2][:4]}', '#0AF956')
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        fig.add_trace(
+            go.Scatter(x=df1['date'], y=df1[df1.columns[1]], name=df1.columns[1],line=dict(color=selected_color1, width=2)),
+            secondary_y=False,
         )
-        st.plotly_chart(fig,use_container_width=True) 
+
+        fig.add_trace(
+            go.Scatter(x=df1['date'], y=df1[df1.columns[2]], name=df1.columns[2],line=dict(color=selected_color2, width=2),),
+            secondary_y=True,
+        )
+
+        fig.update_layout(
+            title_text=f"Corellation entre {df1.columns[1][:4]} et {df1.columns[2][:4]}",
+            title_x=0.3,
+            height=600
+        )
+
+        fig.update_xaxes(title_text="Date")
+
+        fig.update_yaxes(title_text=df1.columns[1][:4], secondary_y=False)
+        fig.update_yaxes(title_text=df1.columns[2][:4], secondary_y=True)
+
+        st.plotly_chart(fig, use_container_width=True)
+    else :
+        col1,col2 = st.columns((2))
+        with col1:
+            selected_color1 = st.color_picker(f'Choisissez le couleur du premiére paramètre', '#095DBA')
+        with col2:
+            selected_color2 = st.color_picker(f'Choisissez le couleur du deuxiéme paramètre', '#0AF956') 
+        st.markdown(f"<h3 style='text-align: center;'>Variation de {title[:4]} pendant les phases séléctionner</h3>", unsafe_allow_html=True)        
+        fig = px.line(df1,x="date",y=df1.columns[1:])
+        fig.update_traces(line=dict(color=selected_color1), selector=dict(name=df1.columns[1]))
+        fig.update_traces(line=dict(color=selected_color2), selector=dict(name=df1.columns[2]))
+        st.plotly_chart(fig,use_container_width=True,height = 200)
+
+        df1["Pourcentage d'élémination"] = np.round(((df1[df1.columns[1]]-df1[df1.columns[-1]])/df1[df1.columns[1]])*100,2)
+        for i in range(len(df1["Pourcentage d'élémination"])):
+           if df1["Pourcentage d'élémination"].iloc[i] <0:
+               df1["Pourcentage d'élémination"].iloc[i] = np.nan
+        
+        # with open("styles.css") as f:
+        #     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+        
+        graphique = st.selectbox('Changer le type du graphique :',
+                    ['Graphique à barres','Graphique en lignes','Graphique en aires','Graphique à points']) 
+        
+        if graphique == "Graphique à barres":
+            selected_color = st.color_picker(f'Choisissez une couleur', '#0AD3E6')
+            st.markdown(f"<h3 style='text-align: center;'>Pourcentage d'élémination de {title[:4]} en %</h3>", unsafe_allow_html=True)        
+            fig = px.bar(df1,x="date",y="Pourcentage d'élémination",color_discrete_sequence=[selected_color])
+            fig.update_traces(text=df1["Pourcentage d'élémination"], textposition='outside')
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        elif graphique == "Graphique en lignes":
+            graphique_pourcentage_elimination(df1,"date","Pourcentage d'élémination",title,px.line)
+        elif graphique == "Graphique en aires":
+            graphique_pourcentage_elimination(df1,"date","Pourcentage d'élémination",title,px.area)
+
+        elif graphique == "Graphique à points":
+            graphique_pourcentage_elimination(df1,"date","Pourcentage d'élémination",title,px.scatter)
 def generate_hex_colors(n):
     colors = []
     for _ in range(n):
@@ -3088,5 +3016,86 @@ def visualisation_param_en_fonction_dautre(df,x,y):
     margin=dict(l=400, r=400, t=40, b=40)
     )
     st.plotly_chart(fig, use_container_width=True)
-#def unity_compare(data):
+def load_data(file,phase):
+    date = pd.to_datetime(st.date_input("Date"))
+    data_qt = pd.read_excel(file, sheet_name=f'QT_{phase}')
+    data_qt['date'] = pd.to_datetime(data_qt['date'])
+    data_qt = data_qt[data_qt["date"] == date]
+    data_qt.replace('/', np.nan, inplace=True)
+    data_qt.replace('en cours', np.nan, inplace=True)
+    print("qt : ",data_qt.info())
 
+    
+
+    data_esli = pd.read_excel(file, sheet_name=f'ESLI_{phase}')
+    data_esli['date'] = pd.to_datetime(data_esli['date'])
+    data_esli = data_esli[data_esli["date"] == date]
+    data_esli.replace('/', np.nan, inplace=True)
+    data_esli.replace('en cours', np.nan, inplace=True)
+    print("qt : ",data_esli.info())
+
+   
+
+    data_ion_exchange = pd.read_excel(file, sheet_name=f'ION_{phase}')
+    data_ion_exchange['date'] = pd.to_datetime(data_ion_exchange['date'])
+    data_ion_exchange = data_ion_exchange[data_ion_exchange["date"] == date]
+    data_ion_exchange.replace('/', np.nan, inplace=True)
+    data_ion_exchange.replace('en cours', np.nan, inplace=True)
+    print("qt : ",data_ion_exchange.info())
+ 
+  
+
+    data_mct = pd.read_excel(file, sheet_name=f'MCT_{phase}')
+    data_mct['date'] = pd.to_datetime(data_mct['date'])
+    data_mct = data_mct[data_mct["date"] == date]
+    data_mct.replace('/', np.nan, inplace=True)
+    data_mct.replace('en cours', np.nan, inplace=True)
+    print("qt : ",data_mct.info())
+def unity_compare(file,phase,list_param):
+    
+    if len(list_param) ==3:
+        data_qt,data_esli, data_ion_exchange, data_mct = load_data(file,phase)
+        qt_param = data_qt[parameter[0]]
+        esli_param = data_esli[parameter[1]]
+        ion_exchange_param = data_ion_exchange[parameter[2]]
+        mct_param = data_mct[parameter[3]]
+
+
+        unity = ['QT', 'ESLI', 'ION EXCHANGE', 'MCT'],
+        parameter = [qt_param,esli_param,ion_exchange_param,mct_param]
+        print(parameter)
+
+        colors = generate_hex_colors(4) 
+        fig = go.Figure(data=[go.Bar(x=parameter, y=unity, marker_color=colors, text=parameter, textposition='outside')])
+        fig.update_layout(
+            title={'text': f"Comparaison des unitées ene fonction ", 'x': 0.36},
+            height=400,  # Ajustez la hauteur ici
+            margin=dict(l=400, r=400, t=40, b=40),
+            bargap=0.7   # Ajustez l'espace entre les barres
+        )
+        st.plotly_chart(fig,use_container_width=True) 
+    else:
+        data_qt,data_esli, data_ion_exchange, data_mct = load_data(file,phase)
+        qt_param = data_qt[parameter[0]]
+        esli_param = data_esli[parameter[1]]
+        ion_exchange_param = data_ion_exchange[parameter[2]]
+
+
+
+        unity = ['QT', 'ESLI', 'ION EXCHANGE'],
+        parameter = [qt_param,esli_param,ion_exchange_param]
+        print(parameter)
+
+        colors = generate_hex_colors(3) 
+        fig = go.Figure(data=[go.Bar(x=parameter, y=unity, marker_color=colors, text=parameter, textposition='outside')])
+        fig.update_layout(
+            title={'text': f"Comparaison des unitées ene fonction ", 'x': 0.36},
+            height=400,  # Ajustez la hauteur ici
+            margin=dict(l=400, r=400, t=40, b=40),
+            bargap=0.7   # Ajustez l'espace entre les barres
+        )
+        st.plotly_chart(fig,use_container_width=True) 
+def graphique_pourcentage_elimination(df,x,y,title,graph):
+    st.markdown(f"<h3 style='text-align: center;'>Pourcentage d'élémination de {title[:4]} en %</h3>", unsafe_allow_html=True)        
+    fig = graph(df,x=x,y=y)
+    st.plotly_chart(fig,use_container_width=True,height = 200)
