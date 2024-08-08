@@ -7,9 +7,8 @@ import streamlit.components.v1 as components
 import random
 from plotly.subplots import make_subplots
 
-
-
 def filter(df,unity,phase):
+    st.markdown(f"<h2 style='text-align: center; font-family: 'Lobster', cursive;color:#095DBA;'>Visualisation des paramètres:</h2>", unsafe_allow_html=True)        
     #filtrage selon l'unité QT
     if (unity == "QT") & (phase =="intake"):
         df = pd.read_excel(df,sheet_name="QT_intake")
@@ -2914,10 +2913,10 @@ def filtrage(t,data):
     endDate = pd.to_datetime(df[c]["date"]).max() 
     
     with col1:
-        date1 = pd.to_datetime(st.date_input("Start Date: ", startDate))
+        date1 = pd.to_datetime(st.date_input("de: ", startDate))
 
     with col2:
-        date2 = pd.to_datetime(st.date_input("End Date: ", endDate))   
+        date2 = pd.to_datetime(st.date_input("à: ", endDate))   
     Variation_param_pendant_phase(df,params,date1,date2,c)   
 def Variation_param_pendant_phase(df,params,date1,date2,c):
     for k in df.keys():
@@ -2939,9 +2938,9 @@ def Variation_param_pendant_phase(df,params,date1,date2,c):
     if (df1.columns[1][:4] != df1.columns[2][:4] ):
         col1,col2 = st.columns((2))
         with col1:
-            selected_color1 = st.color_picker(f'Choisissez le couleur de {df1.columns[1][:4]}', '#095DBA')
+            selected_color1 = st.color_picker(f'Choisissez la couleur de {df1.columns[1][:4]}', '#095DBA')
         with col2:
-            selected_color2 = st.color_picker(f'Choisissez le couleur de {df1.columns[2][:4]}', '#0AF956')
+            selected_color2 = st.color_picker(f'Choisissez la couleur de {df1.columns[2][:4]}', '#0AF956')
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
@@ -3008,14 +3007,6 @@ def generate_hex_colors(n):
         color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
         colors.append(color)
     return colors
-def visualisation_param_en_fonction_dautre(df,x,y):
-    fig = go.Figure(data=[go.Scatter(x=df[x], y=df[y], mode='lines')])
-    fig.update_layout(
-    title={'text': f"Variation de {y} en fonction de {x}", 'x': 0.36},
-    height=400,  # Ajustez la hauteur ici
-    margin=dict(l=400, r=400, t=40, b=40)
-    )
-    st.plotly_chart(fig, use_container_width=True)
 def load_data(file,phase):
     date = pd.to_datetime(st.date_input("Date"))
     data_qt = pd.read_excel(file, sheet_name=f'QT_{phase}')
@@ -3051,50 +3042,41 @@ def load_data(file,phase):
     data_mct.replace('/', np.nan, inplace=True)
     data_mct.replace('en cours', np.nan, inplace=True)
     print("qt : ",data_mct.info())
-def unity_compare(file,phase,list_param):
-    
-    if len(list_param) ==3:
-        data_qt,data_esli, data_ion_exchange, data_mct = load_data(file,phase)
-        qt_param = data_qt[parameter[0]]
-        esli_param = data_esli[parameter[1]]
-        ion_exchange_param = data_ion_exchange[parameter[2]]
-        mct_param = data_mct[parameter[3]]
+def unity_compare(t,unity,phase,params):
+    df ={}
+    for i in range(len(unity)):
+            df[f"{unity[i]}_{phase[unity[i]]}"] = pd.read_excel(t,sheet_name=f"{unity[i]}_{phase[unity[i]]}")
+    c = f"{unity[0]}_{phase[unity[0]]}"
+    col1,col2 = st.columns((2))
+    startDate = pd.to_datetime(df[c]["date"]).min()
+    endDate = pd.to_datetime(df[c]["date"]).max() 
+    with col1:
+        date1 = pd.to_datetime(st.date_input("de: ", startDate))
 
+    with col2:
+        date2 = pd.to_datetime(st.date_input("à: ", endDate)) 
+   
+    for k in df.keys():
+        df[k]['date'] = pd.to_datetime(df[k]['date'])
+        df[k] = df[k][(df[k]["date"] >= date1) & (df[k]["date"] <= date2)]
+        df[k].replace('/', np.nan, inplace=True)
+        df[k].replace('#VALEUR!', np.nan, inplace=True)
+        df[k].replace('en cours', np.nan, inplace=True)
+ 
 
-        unity = ['QT', 'ESLI', 'ION EXCHANGE', 'MCT'],
-        parameter = [qt_param,esli_param,ion_exchange_param,mct_param]
-        print(parameter)
+    df1 = {'date':df[c]["date"]}
+    for k in df.keys():
+        for i in range(len(params[k])):
+            df1[f"{params[k][i]} -- {k}"] = df[k][params[k][i]]                       
+    df1 = pd.DataFrame(df1)
+    print(df1.columns)
+    st.markdown(f"<h3 style='text-align: center;'>Variation de {df1.columns[1][:4]} dans les unitées séléctionnées</h3>", unsafe_allow_html=True)        
+    fig = px.line(df1,x="date",y=df1.columns[1:])
+    st.plotly_chart(fig,use_container_width=True,height = 200)  
 
-        colors = generate_hex_colors(4) 
-        fig = go.Figure(data=[go.Bar(x=parameter, y=unity, marker_color=colors, text=parameter, textposition='outside')])
-        fig.update_layout(
-            title={'text': f"Comparaison des unitées ene fonction ", 'x': 0.36},
-            height=400,  # Ajustez la hauteur ici
-            margin=dict(l=400, r=400, t=40, b=40),
-            bargap=0.7   # Ajustez l'espace entre les barres
-        )
-        st.plotly_chart(fig,use_container_width=True) 
-    else:
-        data_qt,data_esli, data_ion_exchange, data_mct = load_data(file,phase)
-        qt_param = data_qt[parameter[0]]
-        esli_param = data_esli[parameter[1]]
-        ion_exchange_param = data_ion_exchange[parameter[2]]
+    fig = px.bar(df1,x="date",y=df1.columns[1:])
 
-
-
-        unity = ['QT', 'ESLI', 'ION EXCHANGE'],
-        parameter = [qt_param,esli_param,ion_exchange_param]
-        print(parameter)
-
-        colors = generate_hex_colors(3) 
-        fig = go.Figure(data=[go.Bar(x=parameter, y=unity, marker_color=colors, text=parameter, textposition='outside')])
-        fig.update_layout(
-            title={'text': f"Comparaison des unitées ene fonction ", 'x': 0.36},
-            height=400,  # Ajustez la hauteur ici
-            margin=dict(l=400, r=400, t=40, b=40),
-            bargap=0.7   # Ajustez l'espace entre les barres
-        )
-        st.plotly_chart(fig,use_container_width=True) 
+    st.plotly_chart(fig,use_container_width=True,height = 200)
 def graphique_pourcentage_elimination(df,x,y,title,graph):
     st.markdown(f"<h3 style='text-align: center;'>Pourcentage d'élémination de {title[:4]} en %</h3>", unsafe_allow_html=True)        
     fig = graph(df,x=x,y=y)
