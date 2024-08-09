@@ -186,14 +186,14 @@ def filter(df,unity,phase):
         df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
         df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
         df.loc[df['TOC (mg/l)'] > 3, 'TOC (mg/l)'] = 0
-
+        print(df.columns)
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>pH moyenne: {np.around(df['pH'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y="pH")
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col2:
-            st.markdown(f"<h2 style='text-align: center;'>PO43-  (mg/l) moyenne: {np.around(df['PO43-  (mg/l)'].mean(),2)} mg/l</h2>", unsafe_allow_html=True)
-            fig = px.line(df,x="date",y="PO43-  (mg/l)")
+            st.markdown(f"<h2 style='text-align: center;'>PO43-  (mg/l) moyenne: {np.around(df['PO43- (mg/l)'].mean(),2)} mg/l</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="PO43- (mg/l)")
             fig.add_hline(y=0, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                     x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
@@ -282,7 +282,21 @@ def filter(df,unity,phase):
                         ax=0,  # Position X de la flèche par rapport au texte
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
-            st.plotly_chart(fig,use_container_width=True,height = 200)        
+            st.plotly_chart(fig,use_container_width=True,height = 200)   
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>TDS (mg/l) moyenne: {np.around(df['TDS (mg/l)'].mean(),2)} mg/l</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="TDS (mg/l)")
+            fig.add_hline(y=40000, line_dash="dash", line_color="red", line_width=2)
+            fig.add_annotation(
+                        x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
+                        y=40000,  # Position Y (sur la ligne horizontale)
+                        text="TDS (mg/l) doit être égale à 4 0000",  # Texte de l'annotation
+                        showarrow=True,  # Afficher une flèche pointant vers le point
+                        arrowhead=2,  # Type de flèche
+                        ax=0,  # Position X de la flèche par rapport au texte
+                        ay=-40  # Position Y de la flèche par rapport au texte
+                    )
+            st.plotly_chart(fig,use_container_width=True,height = 200)       
     elif (unity == "QT") & (phase =="PERMEAT RO"): 
         df = pd.read_excel(df,sheet_name="QT_PERMEAT RO")
         col1,col2 = st.columns((2))
@@ -524,7 +538,7 @@ def filter(df,unity,phase):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity == "QT") & (phase =="QT_sortie_global"):
+    elif (unity == "QT") & (phase =="sortie_global"):
         df = pd.read_excel(df,sheet_name="QT_sortie_global")
         col1,col2 = st.columns((2))
         df['date'] = pd.to_datetime(df['date'])
@@ -1849,7 +1863,7 @@ def filter(df,unity,phase):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
-    elif (unity == "ION EXCHANGE") & (phase =="ION_Bac_stockage"):
+    elif (unity == "ION EXCHANGE") & (phase =="Bac_stockage"):
         df = pd.read_excel(df,sheet_name="ION_Bac_stockage")
         print(df.columns)
         col1,col2 = st.columns((2))
@@ -2327,8 +2341,8 @@ def filter(df,unity,phase):
                     ay=-40  # Position Y de la flèche par rapport au texte
                 )
             st.plotly_chart(fig,use_container_width=True,height = 200)     
-    elif (unity == "MCT") & (phase =="Après filtration à cartouche"):
-        df = pd.read_excel(df, sheet_name="MCT_après")
+    elif (unity == "MCT") & (phase =="APRES FILTRES A CARTOUCHE"):
+        df = pd.read_excel(df, sheet_name="MCT_APRES FILTRES A CARTOUCHE")
         df['date'] = pd.to_datetime(df['date'])
 
         # Définir les dates minimales et maximales
@@ -2371,7 +2385,7 @@ def filter(df,unity,phase):
         df['TOC (mg/l) LIGNE 4'] = df['TOC (mg/l) LIGNE 4'].astype(float)
         df.loc[df['TOC (mg/l) LIGNE 4'] < 3, 'TOC (mg/l) LIGNE 4'] = 1
         df.loc[df['TOC (mg/l) LIGNE 4'] > 3, 'TOC (mg/l) LIGNE 4'] = 0
-
+        print(df)
 #LIGNE 1
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>pH LIGNE 1 moyen: {np.around(df['pH LIGNE 1'].mean(),2)}</h2>", unsafe_allow_html=True)
@@ -2916,7 +2930,7 @@ def filtrage(t,data):
         date1 = pd.to_datetime(st.date_input("de: ", startDate))
 
     with col2:
-        date2 = pd.to_datetime(st.date_input("à: ", endDate))   
+        date2 = pd.to_datetime(st.date_input("à:", endDate))  
     Variation_param_pendant_phase(df,params,date1,date2,c)   
 def Variation_param_pendant_phase(df,params,date1,date2,c):
     for k in df.keys():
@@ -2932,9 +2946,11 @@ def Variation_param_pendant_phase(df,params,date1,date2,c):
                 for param in params[data]:
                     df1[f"{param}_{data}"] = df[data][param]
                     legend.append(f"{param}_{data}")
-                    title = param            
+                    title = param  
+           
     df1 = pd.DataFrame(df1)
-
+    df1 =  df1[(df1["date"] >= date1) & (df1["date"] <= date2)] 
+    print(df1.shape) 
     if (df1.columns[1][:2] != df1.columns[2][:2] ):
         col1,col2 = st.columns((2))
         with col1:

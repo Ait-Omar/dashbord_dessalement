@@ -68,15 +68,14 @@ container_style = """
         """
 
 uploaded_file = st.file_uploader("Choisissez un fichier Excel", type=["xlsx", "xls"])
+sheets =["QT_intake","QT_PERMEAT FILTRATION","QT_APRES FILTRES A CARTOUCHE","QT_PERMEAT RO","QT_sortie_global",
+        "ESLI_intake","ESLI_PERMEAT FILTRATION", "ESLI_APRES FILTRES A CARTOUCHE","ESLI_PERMEAT RO",
+        "ION_intake","ION_PERMEAT FILTRATION","ION_Bac_stockage","ION_APRES FILTRES A CARTOUCHE","ION_PERMEAT RO",
+        "MCT_intake","MCT_APRES FILTRES A CARTOUCHE","MCT_PERMEAT RO"]
+data = {}
+for sheet in sheets:
+        data[sheet] = pd.read_excel(uploaded_file,sheet_name=sheet)
 if uploaded_file is not None:
-    sheets =["QT_intake","QT_PERMEAT FILTRATION","QT_APRES FILTRES A CARTOUCHE","QT_PERMEAT RO","QT_sortie_global",
-            "ESLI_intake","ESLI_PERMEAT FILTRATION", "ESLI_APRES FILTRES A CARTOUCHE","ESLI_PERMEAT RO",
-            "ION_intake","ION_PERMEAT FILTRATION","ION_Bac_stockage","ION_APRES FILTRES A CARTOUCHE","ION_PERMEAT RO",
-            "MCT_intake","MCT_APRES FILTRES A CARTOUCHE","MCT_PERMEAT RO"]
-    data = {}
-    for sheet in sheets:
-            data[sheet] = pd.read_excel(uploaded_file,sheet_name=sheet)
-
     try:
 
             #st.sidebar.markdown("<h3 style='text-align: center;'>Visualisation des paramètres: </h3>", unsafe_allow_html=True)
@@ -105,13 +104,13 @@ if uploaded_file is not None:
                                         'PERMEAT FILTRATION',
                                         'APRES FILTRES A CARTOUCHE',
                                         'PERMEAT RO',
-                                        'QT_sortie_global'])
+                                        'sortie_global'])
             elif (unity == "ION EXCHANGE"):
                 phase = st.sidebar.selectbox('Phase de traitement:',
                                         ['Options',
                                         'intake',
                                         'PERMEAT FILTRATION',
-                                        'ION_Bac_stockage',
+                                        'Bac_stockage',
                                         'APRES FILTRES A CARTOUCHE',
                                         'PERMEAT RO',
                                         ])
