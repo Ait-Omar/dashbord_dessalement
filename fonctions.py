@@ -2976,16 +2976,16 @@ def Variation_param_pendant_phase(df,params,date1,date2,c):
         fig.update_traces(line=dict(color=selected_color1), selector=dict(name=df1.columns[1]))
         fig.update_traces(line=dict(color=selected_color2), selector=dict(name=df1.columns[2]))
         st.plotly_chart(fig,use_container_width=True,height = 200)
-        print(df1)
-        list_phase = ['intake','PERMEAT FILTRATION','Bac_stockage','APRES FILTERS A CARTOUCHE','PERMEAT RO','sortie_global']
+     
+        list_phase = ['intake','PERMEAT FILTRATION','Bac_stockage','APRES FILTRES A CARTOUCHE','PERMEAT RO','sortie_global']
         x,y = find_elements(list_phase,list(df1.columns))
-        print("first element, last element",x,y)
+        print(x,y)
         elem = ((df1[x]-df1[y])/df1[x])*100
         df1["Pourcentage"] = np.round(elem,2)
         for i in range(len(df1["Pourcentage"])):
            if df1["Pourcentage"].iloc[i] <0:
                df1["Pourcentage"].iloc[i] = np.nan
-        
+
         # with open("styles.css") as f:
         #     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
         
@@ -3060,6 +3060,7 @@ def find_elements(fixed_list, dynamic_list):
     # Rechercher le premier élément
     for element in fixed_list:
         for dynamic_element in dynamic_list:
+            print(dynamic_element)
             if element in dynamic_element:
                 first_element = dynamic_element
                 break
