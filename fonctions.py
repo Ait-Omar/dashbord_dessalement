@@ -2935,12 +2935,12 @@ def Variation_param_pendant_phase(df,params,date1,date2,c):
                     title = param            
     df1 = pd.DataFrame(df1)
 
-    if (df1.columns[1][:4] != df1.columns[2][:4] ):
+    if (df1.columns[1][:2] != df1.columns[2][:2] ):
         col1,col2 = st.columns((2))
         with col1:
             selected_color1 = st.color_picker(f'Choisissez la couleur de {df1.columns[1][:4]}', '#095DBA')
         with col2:
-            selected_color2 = st.color_picker(f'Choisissez la couleur de {df1.columns[2][:4]}', '#0AF956')
+            selected_color2 = st.color_picker(f'Choisissez la couleur de {df1.columns[2][:4]}', '#FF4B4A')
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
@@ -2970,17 +2970,21 @@ def Variation_param_pendant_phase(df,params,date1,date2,c):
         with col1:
             selected_color1 = st.color_picker(f'Choisissez le couleur du premiére paramètre', '#095DBA')
         with col2:
-            selected_color2 = st.color_picker(f'Choisissez le couleur du deuxiéme paramètre', '#0AF956') 
+            selected_color2 = st.color_picker(f'Choisissez le couleur du deuxiéme paramètre', '#FF4B4A') 
         st.markdown(f"<h3 style='text-align: center;'>Variation de {title[:4]} pendant les phases séléctionner</h3>", unsafe_allow_html=True)        
         fig = px.line(df1,x="date",y=df1.columns[1:])
         fig.update_traces(line=dict(color=selected_color1), selector=dict(name=df1.columns[1]))
         fig.update_traces(line=dict(color=selected_color2), selector=dict(name=df1.columns[2]))
         st.plotly_chart(fig,use_container_width=True,height = 200)
-
-        df1["Pourcentage d'élémination"] = np.round(((df1[df1.columns[1]]-df1[df1.columns[-1]])/df1[df1.columns[1]])*100,2)
-        for i in range(len(df1["Pourcentage d'élémination"])):
-           if df1["Pourcentage d'élémination"].iloc[i] <0:
-               df1["Pourcentage d'élémination"].iloc[i] = np.nan
+        print(df1)
+        list_phase = ['intake','PERMEAT FILTRATION','Bac_stockage','APRES FILTERS A CARTOUCHE','PERMEAT RO','sortie_global']
+        x,y = find_elements(list_phase,list(df1.columns))
+        print("first element, last element",x,y)
+        elem = ((df1[x]-df1[y])/df1[x])*100
+        df1["Pourcentage"] = np.round(elem,2)
+        for i in range(len(df1["Pourcentage"])):
+           if df1["Pourcentage"].iloc[i] <0:
+               df1["Pourcentage"].iloc[i] = np.nan
         
         # with open("styles.css") as f:
         #     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -2989,59 +2993,24 @@ def Variation_param_pendant_phase(df,params,date1,date2,c):
                     ['Graphique à barres','Graphique en lignes','Graphique en aires','Graphique à points']) 
         
         if graphique == "Graphique à barres":
-            selected_color = st.color_picker(f'Choisissez une couleur', '#0AD3E6')
-            st.markdown(f"<h3 style='text-align: center;'>Pourcentage d'élémination de {title[:4]} en %</h3>", unsafe_allow_html=True)        
-            fig = px.bar(df1,x="date",y="Pourcentage d'élémination",color_discrete_sequence=[selected_color])
-            fig.update_traces(text=df1["Pourcentage d'élémination"], textposition='outside')
+            selected_color = st.color_picker(f'Choisissez une couleur', '#FF4B4A')
+            st.markdown(f"<h3 style='text-align: center;'>Pourcentage d'élémination moyenne de {title[:4]} :{np.round(df1['Pourcentage'].mean(),2)}  %</h3>", unsafe_allow_html=True)        
+            fig = px.bar(df1,x="date",y="Pourcentage",color_discrete_sequence=[selected_color])
+            fig.update_traces(text=df1["Pourcentage"], textposition='outside')
             st.plotly_chart(fig,use_container_width=True,height = 200)
         elif graphique == "Graphique en lignes":
-            graphique_pourcentage_elimination(df1,"date","Pourcentage d'élémination",title,px.line)
+            graphique_pourcentage_elimination(df1,"date","Pourcentage",title,px.line)
         elif graphique == "Graphique en aires":
-            graphique_pourcentage_elimination(df1,"date","Pourcentage d'élémination",title,px.area)
+            graphique_pourcentage_elimination(df1,"date","Pourcentage",title,px.area)
 
         elif graphique == "Graphique à points":
-            graphique_pourcentage_elimination(df1,"date","Pourcentage d'élémination",title,px.scatter)
+            graphique_pourcentage_elimination(df1,"date","Pourcentage",title,px.scatter)      
 def generate_hex_colors(n):
     colors = []
     for _ in range(n):
         color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
         colors.append(color)
     return colors
-def load_data(file,phase):
-    date = pd.to_datetime(st.date_input("Date"))
-    data_qt = pd.read_excel(file, sheet_name=f'QT_{phase}')
-    data_qt['date'] = pd.to_datetime(data_qt['date'])
-    data_qt = data_qt[data_qt["date"] == date]
-    data_qt.replace('/', np.nan, inplace=True)
-    data_qt.replace('en cours', np.nan, inplace=True)
-    print("qt : ",data_qt.info())
-
-    
-
-    data_esli = pd.read_excel(file, sheet_name=f'ESLI_{phase}')
-    data_esli['date'] = pd.to_datetime(data_esli['date'])
-    data_esli = data_esli[data_esli["date"] == date]
-    data_esli.replace('/', np.nan, inplace=True)
-    data_esli.replace('en cours', np.nan, inplace=True)
-    print("qt : ",data_esli.info())
-
-   
-
-    data_ion_exchange = pd.read_excel(file, sheet_name=f'ION_{phase}')
-    data_ion_exchange['date'] = pd.to_datetime(data_ion_exchange['date'])
-    data_ion_exchange = data_ion_exchange[data_ion_exchange["date"] == date]
-    data_ion_exchange.replace('/', np.nan, inplace=True)
-    data_ion_exchange.replace('en cours', np.nan, inplace=True)
-    print("qt : ",data_ion_exchange.info())
- 
-  
-
-    data_mct = pd.read_excel(file, sheet_name=f'MCT_{phase}')
-    data_mct['date'] = pd.to_datetime(data_mct['date'])
-    data_mct = data_mct[data_mct["date"] == date]
-    data_mct.replace('/', np.nan, inplace=True)
-    data_mct.replace('en cours', np.nan, inplace=True)
-    print("qt : ",data_mct.info())
 def unity_compare(t,unity,phase,params):
     df ={}
     for i in range(len(unity)):
@@ -3069,15 +3038,41 @@ def unity_compare(t,unity,phase,params):
         for i in range(len(params[k])):
             df1[f"{params[k][i]} -- {k}"] = df[k][params[k][i]]                       
     df1 = pd.DataFrame(df1)
-    print(df1.columns)
+    
     st.markdown(f"<h3 style='text-align: center;'>Variation de {df1.columns[1][:4]} dans les unitées séléctionnées</h3>", unsafe_allow_html=True)        
     fig = px.line(df1,x="date",y=df1.columns[1:])
     st.plotly_chart(fig,use_container_width=True,height = 200)  
-
     fig = px.bar(df1,x="date",y=df1.columns[1:])
-
+  
     st.plotly_chart(fig,use_container_width=True,height = 200)
 def graphique_pourcentage_elimination(df,x,y,title,graph):
     st.markdown(f"<h3 style='text-align: center;'>Pourcentage d'élémination de {title[:4]} en %</h3>", unsafe_allow_html=True)        
     fig = graph(df,x=x,y=y)
     st.plotly_chart(fig,use_container_width=True,height = 200)
+    #  for i in range(len(df1.columns)):
+    #     fig = make_subplots(rows=3, cols=1, shared_xaxes=True)
+    #     fig.add_trace(go.Scatter(x=df1['date'], y=df1[df1.columns[i]], name=df1.columns[i]), row=1, col=1)
+    # st.plotly_chart(fig, use_container_width=True)
+def find_elements(fixed_list, dynamic_list):
+    first_element = None
+    last_element = None
+
+    # Rechercher le premier élément
+    for element in fixed_list:
+        for dynamic_element in dynamic_list:
+            if element in dynamic_element:
+                first_element = dynamic_element
+                break
+        if first_element is not None:
+            break
+
+    # Rechercher le dernier élément
+    for element in reversed(fixed_list):
+        for dynamic_element in dynamic_list:
+            if element in dynamic_element:
+                last_element = dynamic_element
+                break
+        if last_element is not None:
+            break
+
+    return first_element, last_element
