@@ -68,14 +68,15 @@ container_style = """
         """
 
 uploaded_file = st.file_uploader("Choisissez un fichier Excel", type=["xlsx", "xls"])
-sheets =["QT_intake","QT_PERMEAT FILTRATION","QT_APRES FILTRES A CARTOUCHE","QT_PERMEAT RO","QT_sortie_global",
+
+if uploaded_file is not None:
+    sheets =["QT_intake","QT_PERMEAT FILTRATION","QT_APRES FILTRES A CARTOUCHE","QT_PERMEAT RO","QT_sortie_global",
         "ESLI_intake","ESLI_PERMEAT FILTRATION", "ESLI_APRES FILTRES A CARTOUCHE","ESLI_PERMEAT RO",
         "ION_intake","ION_PERMEAT FILTRATION","ION_Bac_stockage","ION_APRES FILTRES A CARTOUCHE","ION_PERMEAT RO",
         "MCT_intake","MCT_APRES FILTRES A CARTOUCHE","MCT_PERMEAT RO"]
-data = {}
-for sheet in sheets:
-        data[sheet] = pd.read_excel(uploaded_file,sheet_name=sheet)
-if uploaded_file is not None:
+    data = {}
+    for sheet in sheets:
+            data[sheet] = pd.read_excel(uploaded_file,sheet_name=sheet)
     try:
 
             #st.sidebar.markdown("<h3 style='text-align: center;'>Visualisation des paramètres: </h3>", unsafe_allow_html=True)
@@ -122,12 +123,10 @@ if uploaded_file is not None:
                                         'APRES FILTRES A CARTOUCHE',
                                         'PERMEAT RO',
                                         ])
-            filter(uploaded_file,unity,phase)
-            
+            filter(uploaded_file,unity,phase)         
     except Exception as e:
 
-        st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
-    
+        st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)  
     try:
         
         container_content1 = """
@@ -187,10 +186,7 @@ if uploaded_file is not None:
                                     data[f"{unity_to_compare}_{phase_to_compare[j]}"].columns[1:]) 
 
         filtrage(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare]) 
-       
-
     except Exception as e:
-
         st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
     try:
         container_content2 = """
@@ -242,12 +238,8 @@ if uploaded_file is not None:
                                                                                      data[f"{unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}"].columns[1:]     )
 
         unity_compare(uploaded_file,unity_to_compare1,phase_traitement,paramètre)
-   
-
-    
     except Exception as e:
-
        st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
 else:
-    st.markdown('<div class="centered">Veuillez charger un fichier Excel bien adapter pour commencer.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="centered">Veuillez charger un fichier bien adapter pour commencer.</div>', unsafe_allow_html=True)
 
