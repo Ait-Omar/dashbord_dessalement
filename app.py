@@ -1,11 +1,9 @@
 import streamlit as st
 import pandas as pd
-from fonctions import Visualisation_des_paramètres,Comparaison_des_phases_de_traitement,unity_compare
 from PIL import Image
 import base64
 from io import BytesIO
-
-
+from fonctions import Visualisation_des_paramètres,Comparaison_des_phases_de_traitement,unity_compare
 
 #--------------------------------------------------heradr-------------------------------------------------------------
 st.set_page_config(page_title="DIPS", page_icon="logo.png",layout="wide")
