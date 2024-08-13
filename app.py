@@ -1,17 +1,14 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import plotly.express as px
-from fonctions import filter,filtrage,unity_compare
+from fonctions import Visualisation_des_paramètres,Comparaison_des_phases_de_traitement,unity_compare
 from PIL import Image
 import base64
 from io import BytesIO
 
 
 
-
+#--------------------------------------------------heradr-------------------------------------------------------------
 st.set_page_config(page_title="DIPS", page_icon="logo.png",layout="wide")
-
 
 def image_to_base64(image_path):
     img = Image.open(image_path)
@@ -20,8 +17,8 @@ def image_to_base64(image_path):
     img_str = base64.b64encode(buffer.getvalue()).decode()
     return img_str
 
-# Charger et centrer l'image dans la barre latérale
-logo_path = "logo.png"  # Assurez-vous que le fichier logo.png est dans le même répertoire que ce script
+
+logo_path = "logo.png"  
 logo_base64 = image_to_base64(logo_path)
 
 st.sidebar.markdown(
@@ -68,7 +65,7 @@ container_style = """
         """
 
 uploaded_file = st.file_uploader("Choisissez un fichier Excel", type=["xlsx", "xls"])
-
+#---------------------------------------------Chargement des données---------------------------------------------------
 if uploaded_file is not None:
     sheets =["QT_intake","QT_PERMEAT FILTRATION","QT_APRES FILTRES A CARTOUCHE","QT_PERMEAT RO","QT_sortie_global",
         "ESLI_intake","ESLI_PERMEAT FILTRATION", "ESLI_APRES FILTRES A CARTOUCHE","ESLI_PERMEAT RO",
@@ -77,6 +74,7 @@ if uploaded_file is not None:
     data = {}
     for sheet in sheets:
             data[sheet] = pd.read_excel(uploaded_file,sheet_name=sheet)
+#----------------------------------------------------body-------------------------------------------------------------
     try:
 
             #st.sidebar.markdown("<h3 style='text-align: center;'>Visualisation des paramètres: </h3>", unsafe_allow_html=True)
@@ -123,7 +121,7 @@ if uploaded_file is not None:
                                         'APRES FILTRES A CARTOUCHE',
                                         'PERMEAT RO',
                                         ])
-            filter(uploaded_file,unity,phase)         
+            Visualisation_des_paramètres(uploaded_file,unity,phase)         
     except Exception as e:
 
         st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)  
@@ -185,7 +183,7 @@ if uploaded_file is not None:
                 param_to_compare[f"{unity_to_compare}_{phase_to_compare[j]}"] = st.sidebar.multiselect(f'paramètres d\'{phase_to_compare[j]}',
                                     data[f"{unity_to_compare}_{phase_to_compare[j]}"].columns[1:]) 
 
-        filtrage(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare]) 
+        Comparaison_des_phases_de_traitement(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare]) 
     except Exception as e:
         st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
     try:

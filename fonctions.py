@@ -7,7 +7,7 @@ import streamlit.components.v1 as components
 import random
 from plotly.subplots import make_subplots
 
-def filter(df,unity,phase):
+def Visualisation_des_paramètres(df,unity,phase):
     st.markdown(f"<h2 style='text-align: center; font-family: 'Lobster', cursive;color:#095DBA;'>Visualisation des paramètres:</h2>", unsafe_allow_html=True)        
     #filtrage selon l'unité QT
     if (unity == "QT") & (phase =="intake"):
@@ -317,11 +317,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(F"<h2 style='text-align: center;'>Cond A moyen : {np.around(df['Cond A'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond A doit être inférieure à 450",  # Texte de l'annotation
+                        y=0.450,  # Position Y (sur la ligne horizontale)
+                        text="Cond A doit être inférieure à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -345,11 +345,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond B moyen : {np.around(df['Cond B'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond B doit être inférieure à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond B doit être inférieure à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -373,11 +373,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond C moyen : {np.around(df['Cond C'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond C doit être inférieure à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond C doit être inférieure à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -401,11 +401,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond D moyen : {np.around(df['Cond D'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond D')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond D doit être inférieure à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond D doit être inférieure à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -429,11 +429,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond E moyen : {np.around(df['Cond E'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond E')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond E doit être inférieure à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond E doit être inférieure à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -457,11 +457,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond F moyen : {np.around(df['Cond F'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond F')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond F doit être inférieure à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond F doit être inférieure à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -485,11 +485,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond G moyen : {np.around(df['Cond G'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond G')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond G doit être inférieure à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond G doit être inférieure à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -513,11 +513,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond H moyen : {np.around(df['Cond H'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond H')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond H doit être inférieure à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond H doit être inférieure à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -572,11 +572,11 @@ def filter(df,unity,phase):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond. (mS/cm) à 25° C moyen: {np.around(df['Cond. (mS/cm) à 25° C'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y="Cond. (mS/cm) à 25° C")
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond A doit être inférieure à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond A doit être inférieure à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1138,11 +1138,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond A1 moyen : {np.around(pd.to_numeric(df['Cond A1'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A1')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1152,11 +1152,11 @@ def filter(df,unity,phase):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond A2 moyen : {np.around(pd.to_numeric(df['Cond A2'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A2')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1166,11 +1166,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond A3 moyen : {np.around(pd.to_numeric(df['Cond A3'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A3')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1180,11 +1180,11 @@ def filter(df,unity,phase):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond A4 moyen : {np.around(pd.to_numeric(df['Cond A4'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A4')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1194,11 +1194,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond B1 moyen : {np.around(pd.to_numeric(df['Cond B1'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B1')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1208,11 +1208,11 @@ def filter(df,unity,phase):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond B2 moyen : {np.around(pd.to_numeric(df['Cond B2'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B2')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1222,11 +1222,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond B3 moyen : {np.around(pd.to_numeric(df['Cond B3'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B3')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1236,11 +1236,11 @@ def filter(df,unity,phase):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond B4 moyen : {np.around(pd.to_numeric(df['Cond B4'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B4')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1250,11 +1250,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond C1 moyen : {np.around(pd.to_numeric(df['Cond C1'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C1')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1264,11 +1264,11 @@ def filter(df,unity,phase):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond C2 moyen : {np.around(pd.to_numeric(df['Cond C2'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C2')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1278,11 +1278,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond C3 moyen : {np.around(pd.to_numeric(df['Cond C3'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C3')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1292,11 +1292,11 @@ def filter(df,unity,phase):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond C4 moyen : {np.around(pd.to_numeric(df['Cond C4'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C4')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2037,11 +2037,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond A moyen : {np.around(pd.to_numeric(df['Cond A'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2051,11 +2051,11 @@ def filter(df,unity,phase):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond B moyen : {np.around(pd.to_numeric(df['Cond B'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2065,11 +2065,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond C moyen : {np.around(pd.to_numeric(df['Cond C'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2079,11 +2079,11 @@ def filter(df,unity,phase):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond D moyen : {np.around(pd.to_numeric(df['Cond D'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond D')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2093,11 +2093,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond E moyen : {np.around(pd.to_numeric(df['Cond E'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond E')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2107,11 +2107,11 @@ def filter(df,unity,phase):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond F moyen : {np.around(pd.to_numeric(df['Cond F'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond F')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2121,11 +2121,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond G moyen : {np.around(pd.to_numeric(df['Cond G'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond G')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2135,11 +2135,11 @@ def filter(df,unity,phase):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond H moyen : {np.around(pd.to_numeric(df['Cond H'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond H')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2803,11 +2803,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond LIGNE 1 moyen: {np.around(pd.to_numeric(df['Cond LIGNE 1'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond LIGNE 1')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond LIGNE 1 doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond LIGNE 1 doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2832,11 +2832,11 @@ def filter(df,unity,phase):
         with col1:
                 st.markdown(f"<h2 style='text-align: center;'>Cond LIGNE 2 moyen: {np.around(pd.to_numeric(df['Cond LIGNE 2'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
                 fig = px.line(df,x="date",y='Cond LIGNE 2')
-                fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+                fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
                 fig.add_annotation(
                             x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                            y=450,  # Position Y (sur la ligne horizontale)
-                            text="Cond LIGNE 2 doit être inférieur à 450",  # Texte de l'annotation
+                            y=0.45,  # Position Y (sur la ligne horizontale)
+                            text="Cond LIGNE 2 doit être inférieur à 0.45",  # Texte de l'annotation
                             showarrow=True,  # Afficher une flèche pointant vers le point
                             arrowhead=2,  # Type de flèche
                             ax=0,  # Position X de la flèche par rapport au texte
@@ -2861,11 +2861,11 @@ def filter(df,unity,phase):
         with col1:
                 st.markdown(f"<h2 style='text-align: center;'>Cond LIGNE 3 moyen: {np.around(pd.to_numeric(df['Cond LIGNE 3'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
                 fig = px.line(df,x="date",y='Cond LIGNE 3')
-                fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+                fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
                 fig.add_annotation(
                             x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                            y=450,  # Position Y (sur la ligne horizontale)
-                            text="Cond LIGNE 3 doit être inférieur à 450",  # Texte de l'annotation
+                            y=0.45,  # Position Y (sur la ligne horizontale)
+                            text="Cond LIGNE 3 doit être inférieur à 0.45",  # Texte de l'annotation
                             showarrow=True,  # Afficher une flèche pointant vers le point
                             arrowhead=2,  # Type de flèche
                             ax=0,  # Position X de la flèche par rapport au texte
@@ -2890,11 +2890,11 @@ def filter(df,unity,phase):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond LIGNE 4 moyen: {np.around(pd.to_numeric(df['Cond LIGNE 4'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond LIGNE 4')
-            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=450,  # Position Y (sur la ligne horizontale)
-                        text="Cond LIGNE 4 doit être inférieur à 450",  # Texte de l'annotation
+                        y=0.45,  # Position Y (sur la ligne horizontale)
+                        text="Cond LIGNE 4 doit être inférieur à 0.45",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2915,7 +2915,7 @@ def filter(df,unity,phase):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)            
-def filtrage(t,data):
+def Comparaison_des_phases_de_traitement(t,data):
     df ={}
     params = data[2]
     for j in range(len(data[1])):
