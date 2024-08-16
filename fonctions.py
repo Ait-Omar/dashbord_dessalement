@@ -7,7 +7,7 @@ import streamlit.components.v1 as components
 import random
 from plotly.subplots import make_subplots
 
-def Visualisation_des_paramètres(df,unity,phase):
+def Visualisation_des_paramètres(df,unity,phase): 
     st.markdown(f"<h2 style='text-align: center; font-family: 'Lobster', cursive;color:#095DBA;'>Visualisation des paramètres:</h2>", unsafe_allow_html=True)        
     #filtrage selon l'unité QT
     if (unity == "QT") & (phase =="intake"):
@@ -3058,8 +3058,8 @@ def unity_compare(t,unity,phase,params):
     st.markdown(f"<h3 style='text-align: center;'>Variation de {df1.columns[1][:4]} dans les unitées séléctionnées</h3>", unsafe_allow_html=True)        
     fig = px.line(df1,x="date",y=df1.columns[1:])
     st.plotly_chart(fig,use_container_width=True,height = 200)  
+
     fig = px.bar(df1,x="date",y=df1.columns[1:])
-  
     st.plotly_chart(fig,use_container_width=True,height = 200)
 def graphique_pourcentage_elimination(df,x,y,title,graph):
     st.markdown(f"<h3 style='text-align: center;'>Pourcentage d'élémination de {title[:4]} en %</h3>", unsafe_allow_html=True)        
@@ -3093,3 +3093,37 @@ def find_elements(fixed_list, dynamic_list):
             break
 
     return first_element, last_element
+def labo_oper(d1,d2,phase1,phase2,x,y):
+    df = pd.DataFrame({'date':d2[phase2]['date'],x:d1[phase1][x],y:d2[phase2][y]})
+    # fig = px.line(df,x='date',y=df.columns[1:])
+    # st.plotly_chart(fig,use_container_width=True,height = 200)
+
+    col1,col2 = st.columns((2))
+    with col1:
+        selected_color1 = st.color_picker(f'Choisissez la couleur de {x}', '#095DBA')
+    with col2:
+        selected_color2 = st.color_picker(f'Choisissez la couleur de {y}', '#FF4B4A')
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(
+        go.Scatter(x=df['date'], y=df[df.columns[1]], name=df.columns[1],line=dict(color=selected_color1, width=2)),
+        secondary_y=False,
+    )
+
+    fig.add_trace(
+        go.Scatter(x=df['date'], y=df[df.columns[2]], name=df.columns[2],line=dict(color=selected_color2, width=2),),
+        secondary_y=True,
+    )
+
+    fig.update_layout(
+        title_text=f"Corellation entre {df.columns[1][:4]} et {df.columns[2][:4]}",
+        title_x=0.3,
+        height=600
+    )
+
+    fig.update_xaxes(title_text="Date")
+
+    fig.update_yaxes(title_text=x, secondary_y=False)
+    fig.update_yaxes(title_text=y, secondary_y=True)
+
+    st.plotly_chart(fig, use_container_width=True)
