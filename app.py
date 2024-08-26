@@ -1,9 +1,11 @@
+
+
 import streamlit as st
 import pandas as pd
 from PIL import Image
 import base64
 from io import BytesIO
-from fonctions import Visualisation_des_paramètres,Comparaison_des_phases_de_traitement,unity_compare
+from fonctions import Visualisation_des_paramètres,Comparaison_des_phases_de_traitement,unity_compare,labo_oper,labo_oper1,labo_oper2,vis_op
 
 #--------------------------------------------------heradr-------------------------------------------------------------
 st.set_page_config(page_title="DIPS", page_icon="logo.png",layout="wide")
@@ -65,6 +67,7 @@ container_style = """
 uploaded_file = st.file_uploader("Choisissez un fichier Excel", type=["xlsx", "xls"])
 #---------------------------------------------Chargement des données---------------------------------------------------
 if uploaded_file is not None:
+    st.write("Fichier téléchargé avec succès!")
     sheets =["QT_intake","QT_PERMEAT FILTRATION","QT_APRES FILTRES A CARTOUCHE","QT_PERMEAT RO","QT_sortie_global",
         "ESLI_intake","ESLI_PERMEAT FILTRATION", "ESLI_APRES FILTRES A CARTOUCHE","ESLI_PERMEAT RO",
         "ION_intake","ION_PERMEAT FILTRATION","ION_Bac_stockage","ION_APRES FILTRES A CARTOUCHE","ION_PERMEAT RO",
@@ -73,169 +76,277 @@ if uploaded_file is not None:
     for sheet in sheets:
             data[sheet] = pd.read_excel(uploaded_file,sheet_name=sheet)
 #----------------------------------------------------body-------------------------------------------------------------
-    try:
 
-            #st.sidebar.markdown("<h3 style='text-align: center;'>Visualisation des paramètres: </h3>", unsafe_allow_html=True)
-            container_content0 = """
-        <h3 style='text-align: center;'>Visualisation des paramètres: </h3>
-        </div>
-        """
-            st.sidebar.markdown(container_style + container_content0, unsafe_allow_html=True)
-            unity = st.sidebar.selectbox('Unité:',
-                                        ["Options",
-                                            "QT",
-                                            "ESLI",
-                                            "ION EXCHANGE",
-                                            "MCT"])
 
-            if (unity == "MCT"):
-                phase = st.sidebar.selectbox('Phase de traitement:',
-                                        ['Options',
-                                        'intake',
-                                        'APRES FILTRES A CARTOUCHE',
-                                        'PERMEAT RO'])
-            elif  (unity == "QT"):
-                phase = st.sidebar.selectbox('Phase de traitement:',
-                                        ['Options',
-                                        'intake',
-                                        'PERMEAT FILTRATION',
-                                        'APRES FILTRES A CARTOUCHE',
-                                        'PERMEAT RO',
-                                        'sortie_global'])
-            elif (unity == "ION EXCHANGE"):
-                phase = st.sidebar.selectbox('Phase de traitement:',
-                                        ['Options',
-                                        'intake',
-                                        'PERMEAT FILTRATION',
-                                        'Bac_stockage',
-                                        'APRES FILTRES A CARTOUCHE',
-                                        'PERMEAT RO',
+    #st.sidebar.markdown("<h3 style='text-align: center;'>Visualisation des paramètres: </h3>", unsafe_allow_html=True)
+    # container_content88= """
+    # <h3 style='text-align: center;'>Visualisation des paramètres: </h3>
+    # </div>
+    # """
+    # st.sidebar.markdown(container_style + container_content88, unsafe_allow_html=True)
+    # don = st.sidebar.selectbox('Type des Données:',
+    #                                 [
+    #                                     "Laboratoire",
+    #                                     "Operationnelles",
+    #                                     "Laboratoire & Operationnelles"
+    #                                     ])
+    don = st.sidebar.radio('Données:',
+                                    [
+                                        "Laboratoire",
+                                        "Operationnelles",
+                                        "Laboratoire & Operationnelles"
                                         ])
-            elif(unity == "ESLI"):
-                phase = st.sidebar.selectbox('Phase de traitement:',
-                                        ['Options',
-                                        'intake',
-                                        'PERMEAT FILTRATION',
-                                        'APRES FILTRES A CARTOUCHE',
-                                        'PERMEAT RO',
-                                        ])
-            Visualisation_des_paramètres(uploaded_file,unity,phase)         
-    except Exception as e:
-
-        st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)  
-    try:
+    if don == "Laboratoire":
+        don1 = st.sidebar.radio('Visualisation:',
+                                    [
+                                        "Visualisation des paramètres",
+                                        "Comparaison des phases de traitement",
+                                        "Comparaison des unitées"
+                                        ])       
+        if don1 == "Visualisation des paramètres":
+            # container_content0 = """
+            # <h3 style='text-align: center;'>Visualisation des paramètres: </h3>
+            # </div>
+            # """
+            # st.sidebar.markdown(container_style + container_content0, unsafe_allow_html=True)
+            unity = st.sidebar.radio('Unité:',
+                                            [
+                                                "QT",
+                                                "ESLI",
+                                                "ION EXCHANGE",
+                                                "MCT"])
+            try:
+                if (unity == "MCT"):
+                    phase = st.sidebar.radio('Phase:',
+                                            [
+                                            'intake',
+                                            'APRES FILTRES A CARTOUCHE',
+                                            'PERMEAT RO'])
+                elif  (unity == "QT"):
+                    phase = st.sidebar.radio('Phase:',
+                                            [
+                                            'intake',
+                                            'PERMEAT FILTRATION',
+                                            'APRES FILTRES A CARTOUCHE',
+                                            'PERMEAT RO',
+                                            'sortie_global'])
+                elif (unity == "ION EXCHANGE"):
+                    phase = st.sidebar.radio('Phase:',
+                                            [
+                                            'intake',
+                                            'PERMEAT FILTRATION',
+                                            'Bac_stockage',
+                                            'APRES FILTRES A CARTOUCHE',
+                                            'PERMEAT RO',
+                                            ])
+                elif(unity == "ESLI"):
+                    phase = st.sidebar.radio('Phase:',
+                                            [
+                                            'intake',
+                                            'PERMEAT FILTRATION',
+                                            'APRES FILTRES A CARTOUCHE',
+                                            'PERMEAT RO',
+                                            ])
+                Visualisation_des_paramètres(uploaded_file,unity,phase)         
+            except Exception as e:
+                st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)  
+        elif don1 == "Comparaison des phases de traitement":          
+            # container_content1 = """
+            # <h3 style='text-align: center;'>Comparaison des phases de traitement: </h3>
+            # </div>
+            # """
+            # st.sidebar.markdown(container_style + container_content1, unsafe_allow_html=True)
+            #st.sidebar.markdown("<h3 style='text-align: center;'>Comparaison des paramètres dans la même unité: </h3>", unsafe_allow_html=True)
         
-        container_content1 = """
-        <h3 style='text-align: center;'>Comparaison des phases de traitement: </h3>
-        </div>
-         """
+            phase_to_compare = []
 
+            unity_to_compare = st.sidebar.radio('Unité :',
+                                    [
+                                        "QT",
+                                        "ESLI",
+                                        "ION",
+                                        "MCT"])
+            try:
+                if unity_to_compare == "MCT":
+                    phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+                                                [
+                                                'intake',
+                                                'APRES FILTRES A CARTOUCHE',
+                                                'PERMEAT RO'])
+                elif  ( unity_to_compare == "QT"):
+                    phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+                                                [
+                                                'intake',
+                                                'PERMEAT FILTRATION',
+                                                'APRES FILTRES A CARTOUCHE',
+                                                'PERMEAT RO',
+                                                'sortie_global'])
+                elif (unity_to_compare == "ION"):
+                    phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+                                                [
+                                                'intake',
+                                                'PERMEAT FILTRATION',
+                                                'Bac_stockage',
+                                                'APRES FILTRES A CARTOUCHE',
+                                                'PERMEAT RO',
+                                                ])
+                elif(unity_to_compare == "ESLI"):
+                    phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+                                                [
+                                                'intake',
+                                                'PERMEAT FILTRATION',
+                                                'APRES FILTRES A CARTOUCHE',
+                                                'PERMEAT RO',
+                                                ])
+                    
+                param_to_compare = {}
 
-        st.sidebar.markdown(container_style + container_content1, unsafe_allow_html=True)
-        #st.sidebar.markdown("<h3 style='text-align: center;'>Comparaison des paramètres dans la même unité: </h3>", unsafe_allow_html=True)
-    
-        phase_to_compare = []
+                if phase_to_compare:
+                    for j in range(len(phase_to_compare)):  
+                        param_to_compare[f"{unity_to_compare}_{phase_to_compare[j]}"] = st.sidebar.multiselect(f'paramètres d\'{phase_to_compare[j]}',
+                                            data[f"{unity_to_compare}_{phase_to_compare[j]}"].columns[1:]) 
 
-        unity_to_compare = st.sidebar.selectbox('Unité :',
-                                ["options",
-                                    "QT",
-                                    "ESLI",
-                                    "ION",
-                                    "MCT"])
-        if unity_to_compare == "MCT":
-            phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+                Comparaison_des_phases_de_traitement(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare]) 
+            except Exception as e:
+                st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
+        else:
+            # container_content2 = """
+            # <h3 style='text-align: center;'>Comparaison des unitées:</h3>
+            # </div>
+            # """
+            # st.sidebar.markdown(container_style + container_content2, unsafe_allow_html=True)
+            unity_to_compare1 = st.sidebar.multiselect('Unité:',
+                                    [
+                                        "QT",
+                                        "ESLI",
+                                        "ION",
+                                        "MCT"])
+            try:
+                phase_traitement = {}
+                paramètre = {}
+                for i in range(len(unity_to_compare1)):
+                    if unity_to_compare1[i]  == "MCT":
+                        phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.radio(f"phase de traitement de {unity_to_compare1[i]}",
+                                            [
+                                            "intake",
+                                            'APRES FILTRES A CARTOUCHE',
+                                            'PERMEAT RO'])
+                    elif unity_to_compare1[i]  == "ION":
+                        phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.radio(f"phase de traitement de {unity_to_compare1[i]}",
+                                            [
+                                            "intake",
+                                            "PERMEAT FILTRATION",
+                                            "Bac_stockage",
+                                            'APRES FILTRES A CARTOUCHE',
+                                            'PERMEAT RO'])
+                    elif unity_to_compare1[i]  == "QT":
+                        phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.radio(f"phase de traitement de {unity_to_compare1[i]}",
+                                            [
+                                            "intake",
+                                            "PERMEAT FILTRATION",
+                                            'APRES FILTRES A CARTOUCHE',
+                                            'PERMEAT RO',
+                                            "sortie_global"])
+                    elif unity_to_compare1[i]  == "ESLI":
+                        phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.radio(f"phase de traitement de {unity_to_compare1[i]}",
+                                            [
+                                            "intake",
+                                            "PERMEAT FILTRATION",
+                                            'APRES FILTRES A CARTOUCHE',
+                                            'PERMEAT RO'])
+                    
+
+                    paramètre[f"{unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}"] = st.sidebar.multiselect(f"paramètres de {unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}",
+                                                                                            data[f"{unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}"].columns[1:]     )
+
+                unity_compare(uploaded_file,unity_to_compare1,phase_traitement,paramètre)
+            except Exception as e:
+                st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
+    elif don == "Laboratoire & Operationnelles":
+        unity = st.sidebar.radio('Unity:',
                                         [
-                                        'intake',
-                                        'APRES FILTRES A CARTOUCHE',
-                                        'PERMEAT RO'])
-        elif  ( unity_to_compare == "QT"):
-            phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
-                                        [
-                                        'intake',
-                                        'PERMEAT FILTRATION',
-                                        'APRES FILTRES A CARTOUCHE',
-                                        'PERMEAT RO',
-                                        'sortie_global'])
-        elif (unity_to_compare == "ION"):
-            phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
-                                        [
-                                        'intake',
-                                        'PERMEAT FILTRATION',
-                                        'Bac_stockage',
-                                        'APRES FILTRES A CARTOUCHE',
-                                        'PERMEAT RO',
+                                        'QT',
+                                        'ESLI',
+                                        'MCT'
                                         ])
-        elif(unity_to_compare == "ESLI"):
-            phase_to_compare = st.sidebar.multiselect('Phase de traitement:',
+        if unity == "QT":
+            try:
+                sheets =["UF","FC","RO"]
+                data_opertionel = {}
+                for sheet in sheets:
+                    data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement QT 13-08-2024.xlsx',sheet_name=sheet)
+                phase_op = st.sidebar.radio("Phase operationnelle:",["UF","FC","RO"])
+                phase_labo = st.sidebar.radio('Phase laboratoire:',
+                                            [
+                                            'intake',
+                                            'PERMEAT FILTRATION',
+                                            'APRES FILTRES A CARTOUCHE',
+                                            'PERMEAT RO',
+                                            'sortie_global'])
+                if phase_op != "options":
+                    para_op = st.sidebar.selectbox("paramètres operationels:",data_opertionel[phase_op].columns[1:])
+                if phase_labo != "options":
+                    para_labo = st.sidebar.selectbox("paramètres laboratoire:",data[f"QT_{phase_labo}"].columns[1:])
+                labo_oper(data,data_opertionel,f"QT_{phase_labo}",phase_op,para_labo,para_op)
+            except Exception as e:
+                 st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)  
+        elif unity =="ESLI":
+            try:
+                data_opertionel = {}
+                data_opertionel["UF"] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement ESLI.xlsx',sheet_name="UF")
+                phase_labo = st.sidebar.selectbox('Phase laboratoire:',
+                                            ['Options',
+                                            'intake',
+                                            'PERMEAT FILTRATION',
+                                            'APRES FILTRES A CARTOUCHE',
+                                            'PERMEAT RO'])
+                
+                para_op = st.sidebar.selectbox("paramètres operationels:",data_opertionel["UF"].columns[1:])
+                if phase_labo != "options":
+                    para_labo = st.sidebar.selectbox("paramètres laboratoire:",data[f"QT_{phase_labo}"].columns[1:])
+                labo_oper1(data,data_opertionel,f"ESLI_{phase_labo}",para_labo,para_op)
+            except Exception as e:
+                 st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)  
+        elif unity =="MCT":
+            try:
+                data_opertionel = {}
+                data_opertionel["tr"] = pd.read_excel('SUIVI DP et Q et CIP des RO  MCT 13-08-2024.xlsx',sheet_name="tr")
+                phase_labo = st.sidebar.selectbox('Phase laboratoire:',
+                                            ['Options',
+                                            'intake',
+                                            'APRES FILTRES A CARTOUCHE',
+                                            'PERMEAT RO'])
+                
+                para_op = st.sidebar.selectbox("paramètres operationels:",data_opertionel["tr"].columns[1:])
+                if phase_labo != "options":
+                    para_labo = st.sidebar.selectbox("paramètres laboratoire:",data[f"MCT_{phase_labo}"].columns[1:])
+                labo_oper2(data,data_opertionel,f"MCT_{phase_labo}",para_labo,para_op)
+            except Exception as e:
+                 st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True) 
+    elif don  == "Operationnelles":
+        unity = st.sidebar.radio('Unité:',
                                         [
-                                        'intake',
-                                        'PERMEAT FILTRATION',
-                                        'APRES FILTRES A CARTOUCHE',
-                                        'PERMEAT RO',
+                                        'QT',
+                                        'ESLI',
+                                        'MCT'
                                         ])
-            
-        param_to_compare = {}
+        data_opertionel = {}
+        if unity == 'QT':
+            sheets =["UF","FC","RO"]
+            for sheet in sheets:
+                data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement QT 13-08-2024.xlsx',sheet_name=sheet)
+            phase_op = st.sidebar.radio("Phase:",["UF","FC","RO"])
+            vis_op(data_opertionel,phase_op)
+        elif unity == 'ESLI':
+            sheets =["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"]
+            for sheet in sheets:
+                data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement ESLI.xlsx',sheet_name=sheet)
+            phase_op = st.sidebar.radio("phases operationnelles:",["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"])
+            vis_op(data_opertionel,phase_op)
+        elif unity =="MCT":
+            data_opertionel["tr"] = pd.read_excel('SUIVI DP et Q et CIP des RO  MCT 13-08-2024.xlsx',sheet_name="tr")
+            phase_op = "tr"
+            vis_op(data_opertionel,phase_op)
 
-        if phase_to_compare:
-            for j in range(len(phase_to_compare)):  
-                param_to_compare[f"{unity_to_compare}_{phase_to_compare[j]}"] = st.sidebar.multiselect(f'paramètres d\'{phase_to_compare[j]}',
-                                    data[f"{unity_to_compare}_{phase_to_compare[j]}"].columns[1:]) 
-
-        Comparaison_des_phases_de_traitement(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare]) 
-    except Exception as e:
-        st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
-    try:
-        container_content2 = """
-        <h3 style='text-align: center;'>Comparaison des unitées:</h3>
-        </div>
-        """
-        st.sidebar.markdown(container_style + container_content2, unsafe_allow_html=True)
-        unity_to_compare1 = st.sidebar.multiselect('Unité:',
-                                [
-                                    "QT",
-                                    "ESLI",
-                                    "ION",
-                                    "MCT"])
-        phase_traitement = {}
-        paramètre = {}
-        for i in range(len(unity_to_compare1)):
-            if unity_to_compare1[i]  == "MCT":
-                phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.selectbox(f"phase de traitement de {unity_to_compare1[i]}",
-                                    [
-                                    "intake",
-                                    'APRES FILTRES A CARTOUCHE',
-                                    'PERMEAT RO'])
-            elif unity_to_compare1[i]  == "ION":
-                phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.selectbox(f"phase de traitement de {unity_to_compare1[i]}",
-                                    [
-                                    "intake",
-                                    "PERMEAT FILTRATION",
-                                    "Bac_stockage",
-                                    'APRES FILTRES A CARTOUCHE',
-                                    'PERMEAT RO'])
-            elif unity_to_compare1[i]  == "QT":
-                phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.selectbox(f"phase de traitement de {unity_to_compare1[i]}",
-                                    [
-                                    "intake",
-                                    "PERMEAT FILTRATION",
-                                    'APRES FILTRES A CARTOUCHE',
-                                    'PERMEAT RO',
-                                    "sortie_global"])
-            elif unity_to_compare1[i]  == "ESLI":
-                phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.selectbox(f"phase de traitement de {unity_to_compare1[i]}",
-                                    [
-                                    "intake",
-                                    "PERMEAT FILTRATION",
-                                    'APRES FILTRES A CARTOUCHE',
-                                    'PERMEAT RO'])
-            
-
-            paramètre[f"{unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}"] = st.sidebar.multiselect(f"paramètres de {unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}",
-                                                                                     data[f"{unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}"].columns[1:]     )
-
-        unity_compare(uploaded_file,unity_to_compare1,phase_traitement,paramètre)
-    except Exception as e:
-       st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
 else:
     st.markdown('<div class="centered">Veuillez charger un fichier bien adapter pour commencer.</div>', unsafe_allow_html=True)
-
