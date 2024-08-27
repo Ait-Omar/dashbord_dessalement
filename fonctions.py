@@ -7,22 +7,22 @@ import streamlit.components.v1 as components
 import random
 from plotly.subplots import make_subplots
 
-def Visualisation_des_paramètres(df,unity,phase): 
+def Visualisation_des_paramètres(df,unity,phase,date1,date2): 
     #st.markdown(f"<h2 style='text-align: center; font-family: 'Lobster', cursive;color:#095DBA;'>Visualisation des paramètres:</h2>", unsafe_allow_html=True)        
     #filtrage selon l'unité QT
     if (unity == "QT") & (phase =="intake"):
         df = pd.read_excel(df,sheet_name="QT_intake")
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -134,18 +134,18 @@ def Visualisation_des_paramètres(df,unity,phase):
             st.plotly_chart(fig,use_container_width=True,height = 200)    
     elif (unity == "QT") & (phase =="PERMEAT FILTRATION"):
         df = pd.read_excel(df,sheet_name="QT_PERMEAT FILTRATION")
-        print(df.columns)
+        # print(df.columns)
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
 
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
@@ -210,16 +210,16 @@ def Visualisation_des_paramètres(df,unity,phase):
     elif (unity == "QT") & (phase =="APRES FILTRES A CARTOUCHE"):
         df = pd.read_excel(df,sheet_name="QT_APRES FILTRES A CARTOUCHE")
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
 
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
@@ -341,16 +341,16 @@ def Visualisation_des_paramètres(df,unity,phase):
     elif (unity == "QT") & (phase =="PERMEAT RO"): 
         df = pd.read_excel(df,sheet_name="QT_PERMEAT RO")
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('#VALEUR!', np.nan, inplace=True)
@@ -582,16 +582,16 @@ def Visualisation_des_paramètres(df,unity,phase):
     elif (unity == "QT") & (phase =="sortie_global"):
         df = pd.read_excel(df,sheet_name="QT_sortie_global")
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -656,18 +656,17 @@ def Visualisation_des_paramètres(df,unity,phase):
     #filtrage selon l'unité ESLI
     elif (unity == "ESLI") & (phase =="intake"):
         df = pd.read_excel(df,sheet_name="ESLI_intake")
-        print(df.columns)
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -780,16 +779,16 @@ def Visualisation_des_paramètres(df,unity,phase):
     elif (unity == "ESLI") & (phase =="PERMEAT FILTRATION"):
         df = pd.read_excel(df,sheet_name="ESLI_PERMEAT FILTRATION")
         col1,col2, = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -965,18 +964,17 @@ def Visualisation_des_paramètres(df,unity,phase):
             st.plotly_chart(fig,use_container_width=True,height = 200)
     elif (unity == "ESLI") & (phase =="APRES FILTRES A CARTOUCHE"):
         df = pd.read_excel(df,sheet_name="ESLI_APRES FILTRES A CARTOUCHE")
-        print(df.columns)
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
 
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
@@ -1204,16 +1202,16 @@ def Visualisation_des_paramètres(df,unity,phase):
     elif (unity == "ESLI") & (phase =="PERMEAT RO"):
         df = pd.read_excel(df,sheet_name="ESLI_PERMEAT RO")
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('#VALEUR!', np.nan, inplace=True)
@@ -1557,18 +1555,18 @@ def Visualisation_des_paramètres(df,unity,phase):
     #filtrage selon l'unité ION EXCHANGE
     elif (unity == "ION EXCHANGE") & (phase =="intake"):
         df = pd.read_excel(df,sheet_name="ION_intake")
-        print(df.columns)
+        # print(df.columns)
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -1681,16 +1679,16 @@ def Visualisation_des_paramètres(df,unity,phase):
     elif (unity == "ION EXCHANGE") & (phase =="PERMEAT FILTRATION"):
         df = pd.read_excel(df,sheet_name="ION_PERMEAT FILTRATION")
         col1,col2, = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -1990,18 +1988,18 @@ def Visualisation_des_paramètres(df,unity,phase):
             st.plotly_chart(fig,use_container_width=True,height = 200)
     elif (unity == "ION EXCHANGE") & (phase =="Bac_stockage"):
         df = pd.read_excel(df,sheet_name="ION_Bac_stockage")
-        print(df.columns)
+        # print(df.columns)
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -2052,16 +2050,16 @@ def Visualisation_des_paramètres(df,unity,phase):
     elif (unity == "ION EXCHANGE") & (phase =="APRES FILTRES A CARTOUCHE"):
         df = pd.read_excel(df,sheet_name="ION_APRES FILTRES A CARTOUCHE")
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
 
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
@@ -2145,16 +2143,16 @@ def Visualisation_des_paramètres(df,unity,phase):
     elif (unity == "ION EXCHANGE") & (phase =="PERMEAT RO"):
         df = pd.read_excel(df,sheet_name="ION_PERMEAT RO")
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('#VALEUR!', np.nan, inplace=True)
@@ -2387,18 +2385,18 @@ def Visualisation_des_paramètres(df,unity,phase):
     # filtrage selon l'unité MCT
     elif (unity == "MCT") & (phase =="intake"):
         df = pd.read_excel(df,sheet_name="MCT_intake")
-        print(df.columns)
-        col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # print(df.columns)
+        # col1,col2 = st.columns((2))
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -2510,20 +2508,20 @@ def Visualisation_des_paramètres(df,unity,phase):
             st.plotly_chart(fig,use_container_width=True,height = 200)
     elif (unity == "MCT") & (phase =="APRES FILTRES A CARTOUCHE"):
         df = pd.read_excel(df, sheet_name="MCT_APRES FILTRES A CARTOUCHE")
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        # Définir les dates minimales et maximales
-        startDate = df['date'].min()
-        endDate = df['date'].max()
+        # # Définir les dates minimales et maximales
+        # startDate = df['date'].min()
+        # endDate = df['date'].max()
 
-        # Créer les colonnes pour la sélection des dates
-        col1, col2 = st.columns(2)
+        # # Créer les colonnes pour la sélection des dates
+        # col1, col2 = st.columns(2)
 
-        with col1:
-            date1 = st.date_input("Start Date", startDate)
+        # with col1:
+        #     date1 = st.date_input("Start Date", startDate)
 
-        with col2:
-            date2 = st.date_input("End Date", endDate)
+        # with col2:
+        #     date2 = st.date_input("End Date", endDate)
 
         # Filtrer les données en fonction des dates sélectionnées
         df = df[(df['date'] >= pd.to_datetime(date1)) & (df['date'] <= pd.to_datetime(date2))]
@@ -2951,18 +2949,17 @@ def Visualisation_des_paramètres(df,unity,phase):
             st.plotly_chart(fig,use_container_width=True,height = 200)   
     elif (unity == "MCT") & (phase =="PERMEAT RO"): 
         df = pd.read_excel(df,sheet_name="MCT_PERMEAT RO")
-        print(df.columns)
         col1,col2 = st.columns((2))
-        df['date'] = pd.to_datetime(df['date'])
+        # df['date'] = pd.to_datetime(df['date'])
 
-        startDate = pd.to_datetime(df["date"]).min()
-        endDate = pd.to_datetime(df["date"]).max()
+        # startDate = pd.to_datetime(df["date"]).min()
+        # endDate = pd.to_datetime(df["date"]).max()
 
-        with col1:
-            date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+        # with col1:
+        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-        with col2:
-            date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        # with col2:
+        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('#VALEUR!', np.nan, inplace=True)
@@ -3082,30 +3079,19 @@ def Visualisation_des_paramètres(df,unity,phase):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)            
-def Comparaison_des_phases_de_traitement(t,data):
+def Comparaison_des_phases_de_traitement(t,data,date1,date2):
     df ={}
     params = data[2]
     for j in range(len(data[1])):
         df[f"{data[0]}_{data[1][j]}"] = pd.read_excel(t,sheet_name=f"{data[0]}_{data[1][j]}")
-
     c = f"{data[0]}_{data[1][0]}"
-    col1,col2 = st.columns((2))
-    startDate = pd.to_datetime(df[c]["date"]).min()
-    endDate = pd.to_datetime(df[c]["date"]).max() 
-    
-    with col1:
-        date1 = pd.to_datetime(st.date_input("de: ", startDate))
-
-    with col2:
-        date2 = pd.to_datetime(st.date_input("à:", endDate))  
-    Variation_param_pendant_phase(df,params,date1,date2,c)   
-def Variation_param_pendant_phase(df,params,date1,date2,c):
     for k in df.keys():
         df[k]['date'] = pd.to_datetime(df[k]['date'])
         df[k] = df[k][(df[k]["date"] >= date1) & (df[k]["date"] <= date2)]
         df[k].replace('/', np.nan, inplace=True)
         df[k].replace('#VALEUR!', np.nan, inplace=True)
         df[k].replace('en cours', np.nan, inplace=True) 
+
     df1 = {'date':df[c]["date"]}
     legend = []
     for data, value in params.items():
@@ -3116,8 +3102,8 @@ def Variation_param_pendant_phase(df,params,date1,date2,c):
                     title = param  
            
     df1 = pd.DataFrame(df1)
+    print(df1.columns)
     df1 =  df1[(df1["date"] >= date1) & (df1["date"] <= date2)] 
-    print(df1.shape) 
     if (df1.columns[1][:2] != df1.columns[2][:2] ):
         col1,col2 = st.columns((2))
         with col1:
@@ -3148,7 +3134,7 @@ def Variation_param_pendant_phase(df,params,date1,date2,c):
         fig.update_yaxes(title_text=df1.columns[2][:4], secondary_y=True)
 
         st.plotly_chart(fig, use_container_width=True)
-    else :
+    else:
         col1,col2 = st.columns((2))
         with col1:
             selected_color1 = st.color_picker(f'Choisissez le couleur du premiére paramètre', '#095DBA')
@@ -3162,7 +3148,6 @@ def Variation_param_pendant_phase(df,params,date1,date2,c):
      
         list_phase = ['intake','PERMEAT FILTRATION','Bac_stockage','APRES FILTRES A CARTOUCHE','PERMEAT RO','sortie_global']
         x,y = find_elements(list_phase,list(df1.columns))
-        print(x,y)
         elem = ((df1[x]-df1[y])/df1[x])*100
         df1["Pourcentage"] = np.round(elem,2)
         for i in range(len(df1["Pourcentage"])):
@@ -3187,27 +3172,21 @@ def Variation_param_pendant_phase(df,params,date1,date2,c):
             graphique_pourcentage_elimination(df1,"date","Pourcentage",title,px.area)
 
         elif graphique == "Graphique à points":
-            graphique_pourcentage_elimination(df1,"date","Pourcentage",title,px.scatter)      
+            graphique_pourcentage_elimination(df1,"date","Pourcentage",title,px.scatter)    
+    # else:
+    #     st.markdown(f"<h3 style='text-align: center;'>Variation de {title[:4]} pendant les phases séléctionner</h3>", unsafe_allow_html=True)        
+    #     fig = px.line(df1,x="date",y=df1.columns[1:])
+    #     st.plotly_chart(fig,use_container_width=True,height = 200)  
 def generate_hex_colors(n):
     colors = []
     for _ in range(n):
         color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
         colors.append(color)
     return colors
-def unity_compare(t,unity,phase,params):
+def unity_compare(t,unity,phase,params,date1,date2):
     df ={}
     for i in range(len(unity)):
             df[f"{unity[i]}_{phase[unity[i]]}"] = pd.read_excel(t,sheet_name=f"{unity[i]}_{phase[unity[i]]}")
-    c = f"{unity[0]}_{phase[unity[0]]}"
-    col1,col2 = st.columns((2))
-    startDate = pd.to_datetime(df[c]["date"]).min()
-    endDate = pd.to_datetime(df[c]["date"]).max() 
-    with col1:
-        date1 = pd.to_datetime(st.date_input("de: ", startDate))
-
-    with col2:
-        date2 = pd.to_datetime(st.date_input("à: ", endDate)) 
-   
     for k in df.keys():
         df[k]['date'] = pd.to_datetime(df[k]['date'])
         df[k] = df[k][(df[k]["date"] >= date1) & (df[k]["date"] <= date2)]
@@ -3216,12 +3195,11 @@ def unity_compare(t,unity,phase,params):
         df[k].replace('en cours', np.nan, inplace=True)
  
 
-    df1 = {'date':df[c]["date"]}
+    df1 = {'date':df["QT_intake"]["date"]}
     for k in df.keys():
         for i in range(len(params[k])):
             df1[f"{params[k][i]} -- {k}"] = df[k][params[k][i]]                       
     df1 = pd.DataFrame(df1)
-    
     st.markdown(f"<h3 style='text-align: center;'>Variation de {df1.columns[1][:4]} dans les unitées séléctionnées</h3>", unsafe_allow_html=True)        
     fig = px.line(df1,x="date",y=df1.columns[1:])
     st.plotly_chart(fig,use_container_width=True,height = 200)  
