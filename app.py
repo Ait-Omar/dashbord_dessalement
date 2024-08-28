@@ -5,9 +5,10 @@ import pandas as pd
 from PIL import Image
 import base64
 from io import BytesIO
-from fonctions import Visualisation_des_paramètres,Comparaison_des_phases_de_traitement,unity_compare,labo_oper,labo_oper1,labo_oper2,vis_op
+from fonctions import Visualisation_des_paramètres,Comparaison_des_phases_de_traitement,unity_compare,labo_oper,labo_oper1,labo_oper2,vis_op,compare_op
 
 #--------------------------------------------------heradr-------------------------------------------------------------
+
 st.set_page_config(page_title="DIPS", page_icon="logo.png",layout="wide")
 
 def image_to_base64(image_path):
@@ -16,7 +17,6 @@ def image_to_base64(image_path):
     img.save(buffer, format="PNG")
     img_str = base64.b64encode(buffer.getvalue()).decode()
     return img_str
-
 
 logo_path = "logo.png"  
 logo_base64 = image_to_base64(logo_path)
@@ -32,7 +32,9 @@ st.sidebar.markdown(
 st.markdown("<h1 style='text-align: center;color:#095DBA;'> Dessalement de l'eau de mer mobile à JORF LASFAR</h1>", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("Choisissez un fichier Excel", type=["xlsx", "xls"])
+
 #---------------------------------------------Chargement des données---------------------------------------------------
+
 if uploaded_file is not None:
     st.markdown("<p style='text-align: center;'>Fichier téléchargé avec succès!</p>",unsafe_allow_html=True)
     sheets =["QT_intake","QT_PERMEAT FILTRATION","QT_APRES FILTRES A CARTOUCHE","QT_PERMEAT RO","QT_sortie_global",
@@ -50,7 +52,7 @@ if uploaded_file is not None:
                                         "Operationnelles",
                                         "Laboratoire & Operationnelles"
                                         ])
-    if don == "Laboratoire":
+    if  don == "Laboratoire":
         don1 = st.sidebar.radio('Visualisation:',
                                     [
                                         "Visualisation des paramètres",
@@ -244,7 +246,7 @@ if uploaded_file is not None:
                 sheets =["UF","FC","RO"]
                 data_opertionel = {}
                 for sheet in sheets:
-                    data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement QT 13-08-2024.xlsx',sheet_name=sheet)
+                    data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement QT 27-08-2024.xlsx',sheet_name=sheet)
                 phase_op = st.sidebar.radio("Phase operationnelle:",["UF","FC","RO"])
                 phase_labo = st.sidebar.radio('Phase laboratoire:',
                                             [
@@ -253,77 +255,189 @@ if uploaded_file is not None:
                                             'APRES FILTRES A CARTOUCHE',
                                             'PERMEAT RO',
                                             'sortie_global'])
-                if phase_op != "options":
-                    para_op = st.sidebar.selectbox("paramètres operationels:",data_opertionel[phase_op].columns[1:])
-                if phase_labo != "options":
-                    para_labo = st.sidebar.selectbox("paramètres laboratoire:",data[f"QT_{phase_labo}"].columns[1:])
+                
+                para_op = st.sidebar.selectbox("paramètres operationels:",data_opertionel[phase_op].columns[1:])
+                para_labo = st.sidebar.selectbox("paramètres laboratoire:",data[f"QT_{phase_labo}"].columns[1:])
                 if st.sidebar.button("Apply"):
                     labo_oper(data,data_opertionel,f"QT_{phase_labo}",phase_op,para_labo,para_op)
             except Exception as e:
                  st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)  
         elif unity =="ESLI":
             try:
+                sheets =["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"]
                 data_opertionel = {}
-                data_opertionel["UF"] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement ESLI.xlsx',sheet_name="UF")
-                phase_labo = st.sidebar.selectbox('Phase laboratoire:',
-                                            ['Options',
+                for sheet in sheets:
+                    data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement ESLI.xlsx',sheet_name=sheet)
+                phase_op = st.sidebar.radio("Phase operationnelle:",["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"])
+                phase_labo = st.sidebar.radio('Phase laboratoire:',
+                                            [
                                             'intake',
                                             'PERMEAT FILTRATION',
                                             'APRES FILTRES A CARTOUCHE',
                                             'PERMEAT RO'])
                 
-                para_op = st.sidebar.selectbox("paramètres operationels:",data_opertionel["UF"].columns[1:])
-                if phase_labo != "options":
-                    para_labo = st.sidebar.selectbox("paramètres laboratoire:",data[f"QT_{phase_labo}"].columns[1:])
+                para_op = st.sidebar.selectbox("paramètres operationels:",data_opertionel[phase_op].columns[1:])
+                para_labo = st.sidebar.selectbox("paramètres laboratoire:",data[f"ESLI_{phase_labo}"].columns[1:])
                 if st.sidebar.button("Apply"):
-                    labo_oper1(data,data_opertionel,f"ESLI_{phase_labo}",para_labo,para_op)
+                    labo_oper(data,data_opertionel,f"ESLI_{phase_labo}",phase_op,para_labo,para_op)
             except Exception as e:
                  st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)  
         elif unity =="MCT":
             try:
                 data_opertionel = {}
-                data_opertionel["tr"] = pd.read_excel('SUIVI DP et Q et CIP des RO  MCT 13-08-2024.xlsx',sheet_name="tr")
-                phase_labo = st.sidebar.selectbox('Phase laboratoire:',
-                                            ['Options',
+                data_opertionel["tr"] = pd.read_excel('SUIVI DP et Q et CIP des RO  MCT 27-08-2024.xlsx',sheet_name="tr")
+                phase_labo = st.sidebar.radio('Phase laboratoire:',
+                                            [
                                             'intake',
                                             'APRES FILTRES A CARTOUCHE',
                                             'PERMEAT RO'])
                 
                 para_op = st.sidebar.selectbox("paramètres operationels:",data_opertionel["tr"].columns[1:])
-                if phase_labo != "options":
-                    para_labo = st.sidebar.selectbox("paramètres laboratoire:",data[f"MCT_{phase_labo}"].columns[1:])
+
+                para_labo = st.sidebar.selectbox("paramètres laboratoire:",data[f"MCT_{phase_labo}"].columns[1:])
                 if st.sidebar.button("Apply"):
                     labo_oper2(data,data_opertionel,f"MCT_{phase_labo}",para_labo,para_op)
             except Exception as e:
                  st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True) 
     elif don  == "Operationnelles":
-        unity = st.sidebar.radio('Unité:',
-                                        [
+        don1 = st.sidebar.radio('Visualisation:',
+                                    [
+                                        "Visualisation des paramètres",
+                                        "Comparaison des phases de traitement",
+                                        "Comparaison des unitées"
+                                        ])       
+        if don1 == "Visualisation des paramètres":
+            unity = st.sidebar.radio('Unité:',
+                                            [
+                                                "QT",
+                                                "ESLI",
+                                                "MCT"])
+            data_opertionel = {}
+            try:
+                if (unity == "MCT"):
+                    data_opertionel["tr"] = pd.read_excel('SUIVI DP et Q et CIP des RO  MCT 27-08-2024.xlsx',sheet_name="tr")
+                    phase = st.sidebar.radio('Phase:',
+                                            ["tr"])
+                elif  (unity == "QT"):
+                    sheets =["UF","FC","RO"]
+                    for sheet in sheets:
+                     data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement QT 27-08-2024.xlsx',sheet_name=sheet)
+                    phase = st.sidebar.radio('Phase:',
+                                            ["UF","FC","RO"]
+                                            )
+                elif(unity == "ESLI"):
+                    sheets =["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"]
+                    for sheet in sheets:
+                        data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement ESLI.xlsx',sheet_name=sheet)
+                    phase = st.sidebar.radio('Phase:',
+                                           ["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"])
+                df = pd.read_excel(uploaded_file,sheet_name="QT_intake")
+
+                col1,col2 = st.columns((2))
+                df['date'] = pd.to_datetime(df['date'])
+
+                startDate = pd.to_datetime(df["date"]).min()
+                endDate = pd.to_datetime(df["date"]).max()
+
+                with col1:
+                    date1 = pd.to_datetime(st.sidebar.date_input("Start Date", startDate))
+
+                with col2:
+                    date2 = pd.to_datetime(st.sidebar.date_input("End Date", endDate))
+
+                if st.sidebar.button("Apply"):
+                    vis_op(data_opertionel,phase,date1,date2) 
+            except Exception as e:
+                 st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True) 
+        elif  don1 == "Comparaison des phases de traitement":
+            unity = st.sidebar.radio('Unité:',
+                                            [
+                                                "QT",
+                                                "ESLI",
+                                                "MCT"]) 
+            data_opertionel = {}
+            try:
+                if (unity == "MCT"):
+                    data_opertionel["tr"] = pd.read_excel('SUIVI DP et Q et CIP des RO  MCT 27-08-2024.xlsx',sheet_name="tr")
+                    phase = st.sidebar.multiselect('Phase:',
+                                            ["tr"])
+                elif  (unity == "QT"):
+                    sheets =["UF","FC","RO"]
+                    for sheet in sheets:
+                     data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement QT 27-08-2024.xlsx',sheet_name=sheet)
+                    phase = st.sidebar.multiselect('Phase:',
+                                            ["UF","FC","RO"]
+                                            )
+                elif(unity == "ESLI"):
+                    sheets =["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"]
+                    for sheet in sheets:
+                        data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement ESLI.xlsx',sheet_name=sheet)
+                    phase = st.sidebar.multiselect('Phase:',
+                                           ["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"])
+                    
+                param_to_compare = {}
+
+                if phase:
+                    for j in range(len(phase)):  
+                        param_to_compare[f"{phase[j]}"] = st.sidebar.multiselect(f'paramètres d\'{phase[j]}',
+                                            data_opertionel[f"{phase[j]}"].columns[1:])
+                df = pd.read_excel(uploaded_file,sheet_name="QT_intake")
+
+                col1,col2 = st.columns((2))
+                df['date'] = pd.to_datetime(df['date'])
+
+                startDate = pd.to_datetime(df["date"]).min()
+                endDate = pd.to_datetime(df["date"]).max()
+
+                with col1:
+                    date1 = pd.to_datetime(st.sidebar.date_input("Start Date", startDate))
+
+                with col2:
+                    date2 = pd.to_datetime(st.sidebar.date_input("End Date", endDate))
+
+                if st.sidebar.button("Apply"):
+                    compare_op(data_opertionel,phase,param_to_compare,date1,date2) 
+            except Exception as e:
+                 st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)                        
+        else:
+            unity_to_compare1 = st.sidebar.multiselect('Unité:', [
                                         'QT',
                                         'ESLI',
                                         'MCT'
                                         ])
-        data_opertionel = {}
-        if unity == 'QT':
-            sheets =["UF","FC","RO"]
-            for sheet in sheets:
-                data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement QT 13-08-2024.xlsx',sheet_name=sheet)
-            phase_op = st.sidebar.radio("Phase:",["UF","FC","RO"])
-            if st.sidebar.button("Apply"):
-                vis_op(data_opertionel,phase_op)
-        elif unity == 'ESLI':
-            sheets =["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"]
-            for sheet in sheets:
-                data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement ESLI.xlsx',sheet_name=sheet)
-            phase_op = st.sidebar.radio("phases operationnelles:",["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"])
-            if st.sidebar.button("Apply"):
-                vis_op(data_opertionel,phase_op)
-        elif unity =="MCT":
-            data_opertionel["tr"] = pd.read_excel('SUIVI DP et Q et CIP des RO  MCT 13-08-2024.xlsx',sheet_name="tr")
-            phase_op = "tr"
-            if st.sidebar.button("Apply"):
-                vis_op(data_opertionel,phase_op)
+            try:
+                phase_traitement = {}
+                paramètre = {}
+                for i in range(len(unity_to_compare1)):
+                    if unity_to_compare1[i]  == "MCT":
+                        phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.radio(f"phase de {unity_to_compare1[i]}",
+                                            [
+                                            "tr"
+                                        ])
 
+                    elif unity_to_compare1[i]  == "QT":
+                        phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.radio(f"phase de {unity_to_compare1[i]}",
+                                          ["UF","FC","RO"])
+                    elif unity_to_compare1[i]  == "ESLI":
+                        phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.radio(f"phase de {unity_to_compare1[i]}",
+                                            [
+                                           "UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"])
+                    
+
+                    paramètre[f"{unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}"] = st.sidebar.multiselect(f"paramètres de {unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}",
+                                                                                            data[f"{unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}"].columns[1:]     )
+                col1,col2 = st.columns((2))
+                startDate = pd.to_datetime(data["QT_intake"]["date"]).min()
+                endDate = pd.to_datetime(data["QT_intake"]["date"]).max() 
+                with col1:
+                    date1 = pd.to_datetime(st.sidebar.date_input("de: ", startDate))
+
+                with col2:
+                    date2 = pd.to_datetime(st.sidebar.date_input("à: ", endDate)) 
+   
+                if st.sidebar.button("Apply"):
+                    unity_compare(uploaded_file,unity_to_compare1,phase_traitement,paramètre,date1,date2)
+            except Exception as e:
+                st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
 else:
     st.markdown('<div class="centered">Veuillez charger un fichier bien adapter pour commencer.</div>', unsafe_allow_html=True)
-    # st.markdown("<p style='text-align: center;'>Veuillez charger un fichier bien adapter pour commencer.</p>",unsafe_allow_html=True)

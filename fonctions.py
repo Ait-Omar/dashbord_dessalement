@@ -3102,7 +3102,6 @@ def Comparaison_des_phases_de_traitement(t,data,date1,date2):
                     title = param  
            
     df1 = pd.DataFrame(df1)
-    print(df1.columns)
     df1 =  df1[(df1["date"] >= date1) & (df1["date"] <= date2)] 
     if (df1.columns[1][:2] != df1.columns[2][:2] ):
         col1,col2 = st.columns((2))
@@ -3277,8 +3276,8 @@ def labo_oper(d1,d2,phase1,phase2,x,y):
     fig.update_yaxes(title_text=y, secondary_y=True)
 
     st.plotly_chart(fig, use_container_width=True)
-def labo_oper1(d1,d2,phase1,x,y):
-    df = pd.DataFrame({'date':d1[phase1]['date'],x:d1[phase1][x],y:d2["UF"][y]})
+def labo_oper1(d1,d2,phase1,phase2,x,y):
+    df = pd.DataFrame({'date':d1[phase1]['date'],x:d1[phase1][x],y:d2[phase2][y]})
     df.replace(0, np.nan, inplace=True)
     df.replace('/', np.nan, inplace=True)
     df.replace('CIP', np.nan, inplace=True)
@@ -3353,20 +3352,11 @@ def labo_oper2(d1,d2,phase1,x,y):
     fig.update_yaxes(title_text=y, secondary_y=True)
 
     st.plotly_chart(fig, use_container_width=True)
-def vis_op(data,phase):
+def vis_op(data,phase,date1,date2):
     df = data[phase]
-    print(df.columns)
+
     col1,col2 = st.columns((2))
-    df['date'] = pd.to_datetime(df['date'])
 
-    startDate = pd.to_datetime(df["date"]).min()
-    endDate = pd.to_datetime(df["date"]).max()
-
-    with col1:
-        date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-    with col2:
-        date2 = pd.to_datetime(st.date_input("End Date", endDate))
     df = df[(df["date"] >= date1) & (df["date"] <= date2)]
 
     df.replace(0, np.nan, inplace=True)
@@ -3399,4 +3389,51 @@ def vis_op(data,phase):
                 st.markdown(f"<h2 style='text-align: center;'>{df.columns[i+1]}</h2>", unsafe_allow_html=True)
                 fig = px.line(df, x="date", y=df.columns[i+1])
                 st.plotly_chart(fig, use_container_width=True, height=200)
+def compare_op(data,phase,params,d1,d2):
+    df ={}
+    for k in range(len(phase)):
+        df[phase[k]] = data[phase[k]]
+    for k in df.keys():
+        df[k]['date'] = pd.to_datetime(df[k]['date'])
+        df[k] = df[k][(df[k]["date"] >= d1) & (df[k]["date"] <= d2)]
+        df[k].replace('/', np.nan, inplace=True)
+        df[k].replace('#VALEUR!', np.nan, inplace=True)
+        df[k].replace('en cours', np.nan, inplace=True) 
+        df[k].replace(0, np.nan, inplace=True) 
+    c= f"{phase[0]}"
+    df1 = {'date':df[c]["date"]}
+    
+    df1 = pd.DataFrame(df1)
+    df1 =  df1[(df1["date"] >= d1) & (df1["date"] <= d2)] 
+    for k in df.keys():
+        df1[params[k]] = df[k][params[k]]
+    col1,col2 = st.columns((2))
+    with col1:
+        selected_color1 = st.color_picker(f'Choisissez la couleur de {df1.columns[1][:4]}', '#095DBA')
+    with col2:
+        selected_color2 = st.color_picker(f'Choisissez la couleur de {df1.columns[2][:4]}', '#FF4B4A')
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(
+        go.Scatter(x=df1['date'], y=df1[df1.columns[1]], name=df1.columns[1],line=dict(color=selected_color1, width=2)),
+        secondary_y=False,
+    )
+
+    fig.add_trace(
+        go.Scatter(x=df1['date'], y=df1[df1.columns[2]], name=df1.columns[2],line=dict(color=selected_color2, width=2),),
+        secondary_y=True,
+    )
+
+    fig.update_layout(
+        title_text=f"Corellation entre {df1.columns[1][:4]} et {df1.columns[2][:4]}",
+        title_x=0.3,
+        height=600
+    )
+
+    fig.update_xaxes(title_text="Date")
+
+    fig.update_yaxes(title_text=df1.columns[1][:4], secondary_y=False)
+    fig.update_yaxes(title_text=df1.columns[2][:4], secondary_y=True)
+
+    st.plotly_chart(fig, use_container_width=True)
 
