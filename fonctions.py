@@ -3079,7 +3079,7 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)            
-def Comparaison_des_phases_de_traitement(t,data,date1,date2):
+def Comparaison_des_phases_de_traitement(t,data,date1,date2,graphique):
     df ={}
     params = data[2]
     for j in range(len(data[1])):
@@ -3104,20 +3104,20 @@ def Comparaison_des_phases_de_traitement(t,data,date1,date2):
     df1 = pd.DataFrame(df1)
     df1 =  df1[(df1["date"] >= date1) & (df1["date"] <= date2)] 
     if (df1.columns[1][:2] != df1.columns[2][:2] ):
-        col1,col2 = st.columns((2))
-        with col1:
-            selected_color1 = st.color_picker(f'Choisissez la couleur de {df1.columns[1][:4]}', '#095DBA')
-        with col2:
-            selected_color2 = st.color_picker(f'Choisissez la couleur de {df1.columns[2][:4]}', '#FF4B4A')
+        # col1,col2 = st.columns((2))
+        # with col1:
+        #     selected_color1 = st.color_picker(f'Choisissez la couleur de {df1.columns[1][:4]}', '#095DBA')
+        # with col2:
+        #     selected_color2 = st.color_picker(f'Choisissez la couleur de {df1.columns[2][:4]}', '#FF4B4A')
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
-            go.Scatter(x=df1['date'], y=df1[df1.columns[1]], name=df1.columns[1],line=dict(color=selected_color1, width=2)),
+            go.Scatter(x=df1['date'], y=df1[df1.columns[1]], name=df1.columns[1],line=dict(color='#095DBA', width=2)),
             secondary_y=False,
         )
 
         fig.add_trace(
-            go.Scatter(x=df1['date'], y=df1[df1.columns[2]], name=df1.columns[2],line=dict(color=selected_color2, width=2),),
+            go.Scatter(x=df1['date'], y=df1[df1.columns[2]], name=df1.columns[2],line=dict(color='#FF4B4A', width=2),),
             secondary_y=True,
         )
 
@@ -3134,15 +3134,15 @@ def Comparaison_des_phases_de_traitement(t,data,date1,date2):
 
         st.plotly_chart(fig, use_container_width=True)
     else:
-        col1,col2 = st.columns((2))
-        with col1:
-            selected_color1 = st.color_picker(f'Choisissez le couleur du premiére paramètre', '#095DBA')
-        with col2:
-            selected_color2 = st.color_picker(f'Choisissez le couleur du deuxiéme paramètre', '#FF4B4A') 
+        # col1,col2 = st.columns((2))
+        # with col1:
+        #     selected_color1 = st.color_picker(f'Choisissez le couleur du premiére paramètre', '#095DBA')
+        # with col2:
+        #     selected_color2 = st.color_picker(f'Choisissez le couleur du deuxiéme paramètre', '#FF4B4A') 
         st.markdown(f"<h3 style='text-align: center;'>Variation de {title[:4]} pendant les phases séléctionner</h3>", unsafe_allow_html=True)        
         fig = px.line(df1,x="date",y=df1.columns[1:])
-        fig.update_traces(line=dict(color=selected_color1), selector=dict(name=df1.columns[1]))
-        fig.update_traces(line=dict(color=selected_color2), selector=dict(name=df1.columns[2]))
+        fig.update_traces(line=dict(color='#095DBA'), selector=dict(name=df1.columns[1]))
+        fig.update_traces(line=dict(color='#FF4B4A'), selector=dict(name=df1.columns[2]))
         st.plotly_chart(fig,use_container_width=True,height = 200)
      
         list_phase = ['intake','PERMEAT FILTRATION','Bac_stockage','APRES FILTRES A CARTOUCHE','PERMEAT RO','sortie_global']
@@ -3156,15 +3156,13 @@ def Comparaison_des_phases_de_traitement(t,data,date1,date2):
         # with open("styles.css") as f:
         #     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
         
-        graphique = st.selectbox('Changer le type du graphique :',
-                    ['Graphique à barres','Graphique en lignes','Graphique en aires','Graphique à points']) 
         
         if graphique == "Graphique à barres":
-            selected_color = st.color_picker(f'Choisissez une couleur', '#FF4B4A')
+            # selected_color = st.color_picker(f'Choisissez une couleur', '#FF4B4A')
             st.markdown(f"<h3 style='text-align: center;'>Pourcentage d'élémination moyenne de {title[:4]} :{np.round(df1['Pourcentage'].mean(),2)}  %</h3>", unsafe_allow_html=True)        
-            fig = px.bar(df1,x="date",y="Pourcentage",color_discrete_sequence=[selected_color])
+            fig = px.bar(df1,x="date",y="Pourcentage",color_discrete_sequence=['#FF4B4A'],height = 380)
             fig.update_traces(text=df1["Pourcentage"], textposition='outside')
-            st.plotly_chart(fig,use_container_width=True,height = 200)
+            st.plotly_chart(fig,use_container_width=True)
         elif graphique == "Graphique en lignes":
             graphique_pourcentage_elimination(df1,"date","Pourcentage",title,px.line)
         elif graphique == "Graphique en aires":
@@ -3193,8 +3191,8 @@ def unity_compare(t,unity,phase,params,date1,date2):
         df[k].replace('#VALEUR!', np.nan, inplace=True)
         df[k].replace('en cours', np.nan, inplace=True)
  
-
-    df1 = {'date':df["QT_intake"]["date"]}
+    c = f"{unity[0]}_{phase[unity[0]]}"
+    df1 = {'date':df[c]["date"]}
     for k in df.keys():
         for i in range(len(params[k])):
             df1[f"{params[k][i]} -- {k}"] = df[k][params[k][i]]                       
@@ -3247,20 +3245,20 @@ def labo_oper(d1,d2,phase1,phase2,x,y):
     df.replace('erroné', np.nan, inplace=True)
     df.replace('en cours', np.nan, inplace=True)
 
-    col1,col2 = st.columns((2))
-    with col1:
-        selected_color1 = st.color_picker(f'Choisissez la couleur de {x}', '#095DBA')
-    with col2:
-        selected_color2 = st.color_picker(f'Choisissez la couleur de {y}', '#FF4B4A')
+    # col1,col2 = st.columns((2))
+    # with col1:
+    #     selected_color1 = st.color_picker(f'Choisissez la couleur de {x}', '#095DBA')
+    # with col2:
+    #     selected_color2 = st.color_picker(f'Choisissez la couleur de {y}', '#FF4B4A')
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     fig.add_trace(
-        go.Scatter(x=df['date'], y=df[df.columns[1]], name=df.columns[1],line=dict(color=selected_color1, width=2)),
+        go.Scatter(x=df['date'], y=df[df.columns[1]], name=df.columns[1],line=dict(color='#095DBA', width=2)),
         secondary_y=False,
     )
 
     fig.add_trace(
-        go.Scatter(x=df['date'], y=df[df.columns[2]], name=df.columns[2],line=dict(color=selected_color2, width=2),),
+        go.Scatter(x=df['date'], y=df[df.columns[2]], name=df.columns[2],line=dict(color='#FF4B4A', width=2),),
         secondary_y=True,
     )
 
@@ -3285,20 +3283,20 @@ def labo_oper1(d1,d2,phase1,phase2,x,y):
     df.replace('-', np.nan, inplace=True)
     df.replace('en cours', np.nan, inplace=True)
     # df.replace('', np.nan, inplace=True)
-    col1,col2 = st.columns((2))
-    with col1:
-        selected_color1 = st.color_picker(f'Choisissez la couleur de {x}', '#095DBA')
-    with col2:
-        selected_color2 = st.color_picker(f'Choisissez la couleur de {y}', '#FF4B4A')
+    # col1,col2 = st.columns((2))
+    # with col1:
+    #     selected_color1 = st.color_picker(f'Choisissez la couleur de {x}', '#095DBA')
+    # with col2:
+    #     selected_color2 = st.color_picker(f'Choisissez la couleur de {y}', '#FF4B4A')
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     fig.add_trace(
-        go.Scatter(x=df['date'], y=df[df.columns[1]], name=df.columns[1],line=dict(color=selected_color1, width=2)),
+        go.Scatter(x=df['date'], y=df[df.columns[1]], name=df.columns[1],line=dict(color='#095DBA', width=2)),
         secondary_y=False,
     )
 
     fig.add_trace(
-        go.Scatter(x=df['date'], y=df[df.columns[2]], name=df.columns[2],line=dict(color=selected_color2, width=2),),
+        go.Scatter(x=df['date'], y=df[df.columns[2]], name=df.columns[2],line=dict(color='#FF4B4A', width=2),),
         secondary_y=True,
     )
 
@@ -3331,12 +3329,12 @@ def labo_oper2(d1,d2,phase1,x,y):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     fig.add_trace(
-        go.Scatter(x=df['date'], y=df[df.columns[1]], name=df.columns[1],line=dict(color=selected_color1, width=2)),
+        go.Scatter(x=df['date'], y=df[df.columns[1]], name=df.columns[1],line=dict(color='#095DBA', width=2)),
         secondary_y=False,
     )
 
     fig.add_trace(
-        go.Scatter(x=df['date'], y=df[df.columns[2]], name=df.columns[2],line=dict(color=selected_color2, width=2),),
+        go.Scatter(x=df['date'], y=df[df.columns[2]], name=df.columns[2],line=dict(color='#FF4B4A', width=2),),
         secondary_y=True,
     )
 
@@ -3407,33 +3405,98 @@ def compare_op(data,phase,params,d1,d2):
     df1 =  df1[(df1["date"] >= d1) & (df1["date"] <= d2)] 
     for k in df.keys():
         df1[params[k]] = df[k][params[k]]
-    col1,col2 = st.columns((2))
-    with col1:
-        selected_color1 = st.color_picker(f'Choisissez la couleur de {df1.columns[1][:4]}', '#095DBA')
-    with col2:
-        selected_color2 = st.color_picker(f'Choisissez la couleur de {df1.columns[2][:4]}', '#FF4B4A')
+    # col1,col2 = st.columns((2))
+    # with col1:
+    #     selected_color1 = st.color_picker(f'Choisissez la couleur de {df1.columns[1][:4]}', '#095DBA')
+    # with col2:
+    #     selected_color2 = st.color_picker(f'Choisissez la couleur de {df1.columns[2][:4]}', '#FF4B4A')
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     fig.add_trace(
-        go.Scatter(x=df1['date'], y=df1[df1.columns[1]], name=df1.columns[1],line=dict(color=selected_color1, width=2)),
+        go.Scatter(x=df1['date'], y=df1[df1.columns[1]], name=df1.columns[1],line=dict(color='#095DBA', width=2)),
         secondary_y=False,
     )
 
     fig.add_trace(
-        go.Scatter(x=df1['date'], y=df1[df1.columns[2]], name=df1.columns[2],line=dict(color=selected_color2, width=2),),
+        go.Scatter(x=df1['date'], y=df1[df1.columns[2]], name=df1.columns[2],line=dict(color='#FF4B4A', width=2),),
         secondary_y=True,
     )
 
     fig.update_layout(
-        title_text=f"Corellation entre {df1.columns[1][:4]} et {df1.columns[2][:4]}",
+        title_text=f"Corellation entre {df1.columns[1][:6]} et {df1.columns[2][:6]}",
         title_x=0.3,
         height=600
     )
 
     fig.update_xaxes(title_text="Date")
 
-    fig.update_yaxes(title_text=df1.columns[1][:4], secondary_y=False)
-    fig.update_yaxes(title_text=df1.columns[2][:4], secondary_y=True)
+    fig.update_yaxes(title_text=df1.columns[1][:6], secondary_y=False)
+    fig.update_yaxes(title_text=df1.columns[2][:6], secondary_y=True)
 
     st.plotly_chart(fig, use_container_width=True)
+def compar_unity_op(data,unity,phase,params,date1,date2):
+    df ={}
+    for i in range(len(unity)):
+            df[f"{unity[i]}_{phase[unity[i]]}"] = data[f"{unity[i]}_{phase[unity[i]]}"]
+    for k in df.keys():
+        df[k]['date'] = pd.to_datetime(df[k]['date'])
+        df[k] = df[k][(df[k]["date"] >= date1) & (df[k]["date"] <= date2)]
+        df[k].replace('/', np.nan, inplace=True)
+        df[k].replace('#VALEUR!', np.nan, inplace=True)
+        df[k].replace('en cours', np.nan, inplace=True)
+        df[k].replace(0, np.nan, inplace=True)
+ 
+    c = f"{unity[0]}_{phase[unity[0]]}"
+    df1 = {'date':df[c]["date"]}
+    for k in df.keys():
+        for i in range(len(params[k])):
+            df1[f"{params[k][i]}---{k}"] = df[k][params[k][i]]                       
+    df1 = pd.DataFrame(df1)
+    st.markdown(f"<h3 style='text-align: center;'>Variation de {df1.columns[1][:6]} dans les unitées séléctionnées</h3>", unsafe_allow_html=True)        
+    fig = px.line(df1,x="date",y=df1.columns[1:],height = 400)
+    st.plotly_chart(fig, use_container_width=True) 
 
+
+    fig = px.bar(df1,x="date",y=df1.columns[1:])
+    st.plotly_chart(fig,use_container_width=True,height = 200)
+def visualisation_volume(df):
+    st.markdown(f"<h2 style='text-align: center;'>Volume Produit de chaque unitée en m3</h2>", unsafe_allow_html=True)        
+    fig = px.line(df,x="Date",y=df.columns[1:df.shape[1]-1])
+    st.plotly_chart(fig,use_container_width=True,height = 200)
+    st.markdown(f"<h2 style='text-align: center;'>Volume Total en m3</h2>", unsafe_allow_html=True)        
+    fig = px.line(df,x="Date",y=df.columns[-1])
+    st.plotly_chart(fig,use_container_width=True,height = 200)
+def visualisation_volume_op(data1,data2,phase,volume, param):
+    df1 = {'date':data2['Date']}
+    # df['date'] = data2['Date']
+    df1[param] = data1[phase][param]
+    df1[volume] = data2[volume]
+    df1 = pd.DataFrame(df1)
+    df1.replace(0, np.nan, inplace=True)
+    # # st.markdown(f"<h2 style='text-align: center;'>ION moyen: {np.around(df['Volume total (m3) ION'].mean(),2)} m3</h2>", unsafe_allow_html=True)        
+    # fig = px.line(df1,x="date",y=df1.columns[1:])
+    # st.plotly_chart(fig,use_container_width=True,height = 200)
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(
+        go.Scatter(x=df1['date'], y=df1[df1.columns[1]], name=df1.columns[1],line=dict(color='#095DBA', width=2)),
+        secondary_y=False,
+    )
+
+    fig.add_trace(
+        go.Scatter(x=df1['date'], y=df1[df1.columns[2]], name=df1.columns[2],line=dict(color='#FF4B4A', width=2),),
+        secondary_y=True,
+    )
+
+    fig.update_layout(
+        title_text=f"Corellation entre {df1.columns[1][:6]} et {df1.columns[2][:6]}",
+        title_x=0.3,
+        height=600
+    )
+
+    fig.update_xaxes(title_text="Date")
+
+    fig.update_yaxes(title_text=df1.columns[1][:6], secondary_y=False)
+    fig.update_yaxes(title_text=df1.columns[2][:6], secondary_y=True)
+
+    st.plotly_chart(fig, use_container_width=True)

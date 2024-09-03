@@ -1,11 +1,10 @@
-
-
 import streamlit as st
 import pandas as pd
 from PIL import Image
 import base64
 from io import BytesIO
-from fonctions import Visualisation_des_paramètres,Comparaison_des_phases_de_traitement,unity_compare,labo_oper,labo_oper1,labo_oper2,vis_op,compare_op
+import plotly.express as px
+from fonctions import Visualisation_des_paramètres,Comparaison_des_phases_de_traitement,unity_compare,labo_oper,labo_oper1,labo_oper2,vis_op,compare_op,compar_unity_op,visualisation_volume,visualisation_volume_op
 
 #--------------------------------------------------heradr-------------------------------------------------------------
 
@@ -33,7 +32,7 @@ st.markdown("<h1 style='text-align: center;color:#095DBA;'> Dessalement de l'eau
 
 uploaded_file = st.file_uploader("Choisissez un fichier Excel", type=["xlsx", "xls"])
 
-#---------------------------------------------Chargement des données---------------------------------------------------
+#---------------------------------------------Chargement des données-----------------------------------------------------
 
 if uploaded_file is not None:
     st.markdown("<p style='text-align: center;'>Fichier téléchargé avec succès!</p>",unsafe_allow_html=True)
@@ -44,13 +43,13 @@ if uploaded_file is not None:
     data = {}
     for sheet in sheets:
             data[sheet] = pd.read_excel(uploaded_file,sheet_name=sheet)
-#----------------------------------------------------body-------------------------------------------------------------
-
+#----------------------------------------------------body-----------------------------------------------------------------
     don = st.sidebar.radio('Données:',
                                     [
                                         "Laboratoire",
-                                        "Operationnelles",
-                                        "Laboratoire & Operationnelles"
+                                        "Paramètres de marche",
+                                        "Laboratoire & Paramètres de marche",
+                                        "Volume produit"
                                         ])
     if  don == "Laboratoire":
         don1 = st.sidebar.radio('Visualisation:',
@@ -169,12 +168,14 @@ if uploaded_file is not None:
                 endDate = pd.to_datetime(data["QT_intake"]["date"]).max() 
                 
                 with col1:
-                    date1 = pd.to_datetime(st.sidebar.date_input("de: ", startDate))
+                    date1 = pd.to_datetime(st.sidebar.date_input("Start date: ", startDate))
 
                 with col2:
-                    date2 = pd.to_datetime(st.sidebar.date_input("à:", endDate))  
+                    date2 = pd.to_datetime(st.sidebar.date_input("End date:", endDate))  
+                graphique = st.sidebar.selectbox('Type du graphique :',
+                    ['Graphique à barres','Graphique en lignes','Graphique en aires','Graphique à points']) 
                 if st.sidebar.button("Apply"):
-                    Comparaison_des_phases_de_traitement(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare],date1,date2) 
+                    Comparaison_des_phases_de_traitement(uploaded_file,[unity_to_compare, phase_to_compare, param_to_compare],date1,date2,graphique) 
             except Exception as e:
                 st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
         else:
@@ -234,7 +235,7 @@ if uploaded_file is not None:
                     unity_compare(uploaded_file,unity_to_compare1,phase_traitement,paramètre,date1,date2)
             except Exception as e:
                 st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
-    elif don == "Laboratoire & Operationnelles":
+    elif don == "Laboratoire & Paramètres de marche":
         unity = st.sidebar.radio('Unity:',
                                         [
                                         'QT',
@@ -299,7 +300,7 @@ if uploaded_file is not None:
                     labo_oper2(data,data_opertionel,f"MCT_{phase_labo}",para_labo,para_op)
             except Exception as e:
                  st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True) 
-    elif don  == "Operationnelles":
+    elif don  == "Paramètres de marche":
         don1 = st.sidebar.radio('Visualisation:',
                                     [
                                         "Visualisation des paramètres",
@@ -364,7 +365,7 @@ if uploaded_file is not None:
                 elif  (unity == "QT"):
                     sheets =["UF","FC","RO"]
                     for sheet in sheets:
-                     data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement QT 27-08-2024.xlsx',sheet_name=sheet)
+                        data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement QT 27-08-2024.xlsx',sheet_name=sheet)
                     phase = st.sidebar.multiselect('Phase:',
                                             ["UF","FC","RO"]
                                             )
@@ -400,32 +401,38 @@ if uploaded_file is not None:
             except Exception as e:
                  st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)                        
         else:
-            unity_to_compare1 = st.sidebar.multiselect('Unité:', [
-                                        'QT',
-                                        'ESLI',
-                                        'MCT'
-                                        ])
+            unity_to_compare = st.sidebar.multiselect('Unité:',
+                                    [
+                                        "QT",
+                                        "ESLI",
+                                        "MCT"])
             try:
+                data_opertionel={}
                 phase_traitement = {}
                 paramètre = {}
-                for i in range(len(unity_to_compare1)):
-                    if unity_to_compare1[i]  == "MCT":
-                        phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.radio(f"phase de {unity_to_compare1[i]}",
+                for i in range(len(unity_to_compare)):
+                    if unity_to_compare[i]  == "MCT":
+                        data_opertionel[f"{unity_to_compare[i]}_tr"] = pd.read_excel('SUIVI DP et Q et CIP des RO  MCT 27-08-2024.xlsx',sheet_name="tr")
+                        phase_traitement[f"{unity_to_compare[i]}"] = st.sidebar.radio(f"phases de {unity_to_compare[i]}",
                                             [
                                             "tr"
                                         ])
-
-                    elif unity_to_compare1[i]  == "QT":
-                        phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.radio(f"phase de {unity_to_compare1[i]}",
+                    elif unity_to_compare[i]  == "QT":
+                        sheets =["UF","FC","RO"]
+                        for sheet in sheets:
+                            data_opertionel[f"{unity_to_compare[i]}_{sheet}"] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement QT 27-08-2024.xlsx',sheet_name=sheet)
+                        phase_traitement[f"{unity_to_compare[i]}"] = st.sidebar.radio(f"phases de {unity_to_compare[i]}",
                                           ["UF","FC","RO"])
-                    elif unity_to_compare1[i]  == "ESLI":
-                        phase_traitement[f"{unity_to_compare1[i]}"] = st.sidebar.radio(f"phase de {unity_to_compare1[i]}",
+                    else:
+                        sheets =["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"]
+                        for sheet in sheets:
+                             data_opertionel[f"{unity_to_compare[i]}_{sheet}"] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement ESLI.xlsx',sheet_name=sheet)
+                        phase_traitement[f"{unity_to_compare[i]}"] = st.sidebar.radio(f"phases de {unity_to_compare[i]}",
                                             [
                                            "UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"])
-                    
-
-                    paramètre[f"{unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}"] = st.sidebar.multiselect(f"paramètres de {unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}",
-                                                                                            data[f"{unity_to_compare1[i]}_{phase_traitement[unity_to_compare1[i]]}"].columns[1:]     )
+    
+                    paramètre[f"{unity_to_compare[i]}_{phase_traitement[unity_to_compare[i]]}"] = st.sidebar.multiselect(f"paramètres de {unity_to_compare[i]}_{phase_traitement[unity_to_compare[i]]}",
+                                                                                            data_opertionel[f"{unity_to_compare[i]}_{phase_traitement[unity_to_compare[i]]}"].columns[1:])
                 col1,col2 = st.columns((2))
                 startDate = pd.to_datetime(data["QT_intake"]["date"]).min()
                 endDate = pd.to_datetime(data["QT_intake"]["date"]).max() 
@@ -436,8 +443,54 @@ if uploaded_file is not None:
                     date2 = pd.to_datetime(st.sidebar.date_input("à: ", endDate)) 
    
                 if st.sidebar.button("Apply"):
-                    unity_compare(uploaded_file,unity_to_compare1,phase_traitement,paramètre,date1,date2)
+                    compar_unity_op(data_opertionel,unity_to_compare,phase_traitement,paramètre,date1,date2)
             except Exception as e:
                 st.markdown(f"<h3 style='text-align: center;color:red;'></h3>", unsafe_allow_html=True)
+    else:
+        don = st.sidebar.radio('Visualisation:',
+                                    [
+                                        "Volume produit (m3)",
+                                        "Volume & Paramètres de marche",
+                                        ])      
+        df = pd.read_excel('Copie de Résultat de Production et TRG - Eau Dessalement Mobile et Fixe au   25 08 2024.xlsb .xlsx',sheet_name="Volume")
+        if don == "Volume produit (m3)":
+            df = pd.read_excel('Copie de Résultat de Production et TRG - Eau Dessalement Mobile et Fixe au   25 08 2024.xlsb .xlsx',sheet_name="Volume")
+            # param = st.sidebar.radio('Unitée:',df.columns[1:])
+            if st.sidebar.button("Aply"):
+                visualisation_volume(df)
+        elif don == "Volume & Paramètres de marche":
+            df = pd.read_excel('Copie de Résultat de Production et TRG - Eau Dessalement Mobile et Fixe au   25 08 2024.xlsb .xlsx',sheet_name="Volume")
+            data_opertionel={}
+            unity_to_compare = st.sidebar.radio('Unité:',
+                                            [
+                                            "QT",
+                                            "ESLI",
+                                            "ION",
+                                            "MCT"
+                                            ])
+            if (unity_to_compare == "MCT"):
+                data_opertionel["tr"] = pd.read_excel('SUIVI DP et Q et CIP des RO  MCT 27-08-2024.xlsx',sheet_name="tr")
+                phase = st.sidebar.radio('Phase:',
+                                        ["tr"])
+            elif  (unity_to_compare == "QT"):
+                sheets =["UF","FC","RO"]
+                for sheet in sheets:
+                    data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement QT 27-08-2024.xlsx',sheet_name=sheet)
+                phase = st.sidebar.radio('Phase:',
+                                        ["UF","FC","RO"]
+                                        )
+            elif(unity_to_compare == "ESLI"):
+                sheets =["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"]
+                for sheet in sheets:
+                    data_opertionel[sheet] = pd.read_excel('Suivi contrôle qualité d\'eau de dessalement ESLI.xlsx',sheet_name=sheet)
+                phase = st.sidebar.radio('Phase:',
+                                        ["UF","FC","RO ZONE A","RO ZONE B","RO ZONE C"])
+            paramètre = st.sidebar.selectbox(f"paramètres de {unity_to_compare}_{phase}",
+                                                                                           data_opertionel[phase].columns[1:])
+            
+            volume = st.sidebar.selectbox('Volume produit (m3):',
+                                            df.columns[1:]) 
+            if st.sidebar.button("Aply"):
+                visualisation_volume_op(data_opertionel,df,phase,volume,paramètre)
 else:
     st.markdown('<div class="centered">Veuillez charger un fichier bien adapter pour commencer.</div>', unsafe_allow_html=True)
