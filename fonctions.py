@@ -6,26 +6,21 @@ import plotly.graph_objects as go
 import streamlit.components.v1 as components
 import random
 from plotly.subplots import make_subplots
+import smtplib
+import json
+from email.message import EmailMessage
+import plotly.io as pio
 
 def Visualisation_des_paramètres(df,unity,phase,date1,date2): 
-    #st.markdown(f"<h2 style='text-align: center; font-family: 'Lobster', cursive;color:#095DBA;'>Visualisation des paramètres:</h2>", unsafe_allow_html=True)        
     #filtrage selon l'unité QT
     if (unity == "QT") & (phase =="intake"):
         df = pd.read_excel(df,sheet_name="QT_intake")
         col1,col2 = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
 
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
+        df['TDS (mg/l)'].replace(0, np.nan, inplace=True)
         df['TOC (mg/l)'] = df['TOC (mg/l)'].replace('<3',1)
         df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
         df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
@@ -33,45 +28,56 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond. (mS/cm) à 25° C moyen: {np.around(df['Cond. (mS/cm) à 25° C'].mean(),2)}</h2>", unsafe_allow_html=True)        
             fig = px.line(df,x="date",y="Cond. (mS/cm) à 25° C")
-            # fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
-            # fig.add_annotation(
-            #         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-            #         y=0.1,  # Position Y (sur la ligne horizontale)
-            #         text="Cond. (mS/cm) à 25° C doit être inférieur ou égale à 0.1",  # Texte de l'annotation
-            #         showarrow=True,  # Afficher une flèche pointant vers le point
-            #         arrowhead=2,  # Type de flèche
-            #         ax=0,  # Position X de la flèche par rapport au texte
-            #         ay=-40  # Position Y de la flèche par rapport au texte
-            #     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Turb (NTU) moyen: {np.around(df['Turb (NTU)'].mean(),2)}</h2>", unsafe_allow_html=True)        
             fig = px.line(df,x="date",y="Turb (NTU)")
-            # fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
-            # fig.add_annotation(
-            #         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-            #         y=0.1,  # Position Y (sur la ligne horizontale)
-            #         text="Turb (NTU) doit être inférieur ou égale à 0.1",  # Texte de l'annotation
-            #         showarrow=True,  # Afficher une flèche pointant vers le point
-            #         arrowhead=2,  # Type de flèche
-            #         ax=0,  # Position X de la flèche par rapport au texte
-            #         ay=-40  # Position Y de la flèche par rapport au texte
-            #     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>PO43- (mg/l) moyen: {np.around(df['PO43- (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)        
             fig = px.line(df,x="date",y="PO43- (mg/l)")
             fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
-                    x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                    y=0.1,  # Position Y (sur la ligne horizontale)
-                    text="PO43- doit être inférieur ou égale à 0.1",  # Texte de l'annotation
-                    showarrow=True,  # Afficher une flèche pointant vers le point
-                    arrowhead=2,  # Type de flèche
-                    ax=0,  # Position X de la flèche par rapport au texte
-                    ay=-40  # Position Y de la flèche par rapport au texte
+                    x=df['date'].iloc[-1], 
+                    y=0.1, 
+                    text="PO43- doit être inférieur ou égale à 0.1",  
+                    showarrow=True, 
+                    arrowhead=2,  
+                    ax=0, 
+                    ay=-40  
                 )
             st.plotly_chart(fig,use_container_width=True,height = 200)
+            with open('config.json') as json_file:
+                gmail_cfg = json.load(json_file)
+            seuil_po43 = 0.1
+
+            # Vérification de la dernière valeur de PO43-
+            valeur_actuelle_po43 =df['PO43- (mg/l)'].iloc[-1]
+
+            if valeur_actuelle_po43 > seuil_po43:
+                # Sauvegarde le graphique comme image
+                pio.write_image(fig, 'graph_PO43.png')
+
+                # Création du message e-mail
+                msg = EmailMessage()
+                msg['To'] = "lightupyourhome03@gmail.com"
+                msg['From'] = gmail_cfg['email']
+                msg['Subject'] = "Alerte PO43- Dépassement du Seuil"
+                msg.set_content(f'La valeur de PO43- (mg/l) est de {valeur_actuelle_po43} et a dépassé le seuil de 0.1. Voir le graphique ci-joint.')
+
+                # Ajout de l'image en pièce jointe
+                with open('graph_PO43.png', 'rb') as f:
+                    file_data = f.read()
+                    file_name = f.name
+                    msg.add_attachment(file_data, maintype='image', subtype='png', filename=file_name)
+
+                # Envoi de l'e-mail
+                with smtplib.SMTP_SSL(gmail_cfg['serveur'], gmail_cfg['port']) as smtp:
+                    smtp.login(gmail_cfg['email'], gmail_cfg['pwd'])
+                    smtp.send_message(msg)
+                    print("Notification envoyée avec succès avec le graphique !")
+            else:
+                print("La valeur actuelle de PO43- est inférieure ou égale au seuil. Aucune notification envoyée.")
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>SiO2 (mg/l) moyen: {np.around(df['SiO2 (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y="SiO2 (mg/l)")
@@ -121,32 +127,15 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>pH moyenne: {np.around(df['pH'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y="pH")
-            # fig.add_hline(y=0, line_dash="dash", line_color="red", line_width=2)
-            # fig.add_annotation(
-            #         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-            #         y=0,  # Position Y (sur la ligne horizontale)
-            #         text="Cl2 libre doit être égale à 0",  # Texte de l'annotation
-            #         showarrow=True,  # Afficher une flèche pointant vers le point
-            #         arrowhead=2,  # Type de flèche
-            #         ax=0,  # Position X de la flèche par rapport au texte
-            #         ay=-40  # Position Y de la flèche par rapport au texte
-            #     )
-            st.plotly_chart(fig,use_container_width=True,height = 200)    
+            st.plotly_chart(fig,use_container_width=True,height = 200)   
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>TDS (mg/l) moyenne: {np.around(df['TDS (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="TDS (mg/l)")
+            st.plotly_chart(fig,use_container_width=True,height = 200)   
     elif (unity == "QT") & (phase =="PERMEAT FILTRATION"):
         df = pd.read_excel(df,sheet_name="QT_PERMEAT FILTRATION")
         # print(df.columns)
         col1,col2 = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
-
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
-
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -210,17 +199,6 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
     elif (unity == "QT") & (phase =="APRES FILTRES A CARTOUCHE"):
         df = pd.read_excel(df,sheet_name="QT_APRES FILTRES A CARTOUCHE")
         col1,col2 = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
-
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
-
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -341,28 +319,18 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
     elif (unity == "QT") & (phase =="PERMEAT RO"): 
         df = pd.read_excel(df,sheet_name="QT_PERMEAT RO")
         col1,col2 = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
-
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('#VALEUR!', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
         with col1:
-            st.markdown(F"<h2 style='text-align: center;'>Cond A moyen : {np.around(df['Cond A'].mean(),2)}</h2>", unsafe_allow_html=True)
+            st.markdown(F"<h2 style='text-align: center;'>Cond A moyen en (mS/cm): {np.around(df['Cond A'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A')
-            fig.add_hline(y=0.450, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.450,  # Position Y (sur la ligne horizontale)
-                        text="Cond A doit être inférieure à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond A doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -384,13 +352,13 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Cond B moyen : {np.around(df['Cond B'].mean(),2)}</h2>", unsafe_allow_html=True)
+            st.markdown(f"<h2 style='text-align: center;'>Cond B moyen en (mS/cm): {np.around(df['Cond B'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond B doit être inférieure à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond B doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -412,13 +380,13 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Cond C moyen : {np.around(df['Cond C'].mean(),2)}</h2>", unsafe_allow_html=True)
+            st.markdown(f"<h2 style='text-align: center;'>Cond C moyen en (mS/cm): {np.around(df['Cond C'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond C doit être inférieure à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond C doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -440,13 +408,13 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Cond D moyen : {np.around(df['Cond D'].mean(),2)}</h2>", unsafe_allow_html=True)
+            st.markdown(f"<h2 style='text-align: center;'>Cond D moyen en (mS/cm): {np.around(df['Cond D'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond D')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond D doit être inférieure à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond D doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -468,13 +436,13 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Cond E moyen : {np.around(df['Cond E'].mean(),2)}</h2>", unsafe_allow_html=True)
+            st.markdown(f"<h2 style='text-align: center;'>Cond E moyen en (mS/cm): {np.around(df['Cond E'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond E')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond E doit être inférieure à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond E doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -496,13 +464,13 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Cond F moyen : {np.around(df['Cond F'].mean(),2)}</h2>", unsafe_allow_html=True)
+            st.markdown(f"<h2 style='text-align: center;'>Cond F moyen en (mS/cm): {np.around(df['Cond F'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond F')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond F doit être inférieure à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond F doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -524,13 +492,13 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Cond G moyen : {np.around(df['Cond G'].mean(),2)}</h2>", unsafe_allow_html=True)
+            st.markdown(f"<h2 style='text-align: center;'>Cond G moyen en (mS/cm): {np.around(df['Cond G'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond G')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond G doit être inférieure à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond G doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -552,13 +520,13 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
-            st.markdown(f"<h2 style='text-align: center;'>Cond H moyen : {np.around(df['Cond H'].mean(),2)}</h2>", unsafe_allow_html=True)
+            st.markdown(f"<h2 style='text-align: center;'>Cond H moyen en (mS/cm): {np.around(df['Cond H'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond H')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond H doit être inférieure à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond H doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -582,16 +550,7 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
     elif (unity == "QT") & (phase =="sortie_global"):
         df = pd.read_excel(df,sheet_name="QT_sortie_global")
         col1,col2 = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
-
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
+        
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -613,11 +572,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond. (mS/cm) à 25° C moyen: {np.around(df['Cond. (mS/cm) à 25° C'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y="Cond. (mS/cm) à 25° C")
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond A doit être inférieure à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond A doit être inférieure à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -652,24 +611,14 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200) 
-
     #filtrage selon l'unité ESLI
     elif (unity == "ESLI") & (phase =="intake"):
         df = pd.read_excel(df,sheet_name="ESLI_intake")
         col1,col2 = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
-
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
+        df['TDS (mg/l)'].replace(0, np.nan, inplace=True)
         df['TOC (mg/l)'] = df['TOC (mg/l)'].replace('<3',1)
         df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
         df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
@@ -775,6 +724,10 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
             #         ax=0,  # Position X de la flèche par rapport au texte
             #         ay=-40  # Position Y de la flèche par rapport au texte
             #     )
+            st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>TDS (mg/l) moyenne: {np.around(df['TDS (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="TDS (mg/l)")
             st.plotly_chart(fig,use_container_width=True,height = 200)
     elif (unity == "ESLI") & (phase =="PERMEAT FILTRATION"):
         df = pd.read_excel(df,sheet_name="ESLI_PERMEAT FILTRATION")
@@ -1202,16 +1155,6 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
     elif (unity == "ESLI") & (phase =="PERMEAT RO"):
         df = pd.read_excel(df,sheet_name="ESLI_PERMEAT RO")
         col1,col2 = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
-
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('#VALEUR!', np.nan, inplace=True)
@@ -1219,11 +1162,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond A1 moyen : {np.around(pd.to_numeric(df['Cond A1'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A1')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1233,11 +1176,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond A2 moyen : {np.around(pd.to_numeric(df['Cond A2'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A2')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1247,11 +1190,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond A3 moyen : {np.around(pd.to_numeric(df['Cond A3'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A3')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1261,11 +1204,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond A4 moyen : {np.around(pd.to_numeric(df['Cond A4'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A4')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1275,11 +1218,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond B1 moyen : {np.around(pd.to_numeric(df['Cond B1'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B1')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1289,11 +1232,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond B2 moyen : {np.around(pd.to_numeric(df['Cond B2'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B2')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1303,11 +1246,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond B3 moyen : {np.around(pd.to_numeric(df['Cond B3'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B3')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1317,11 +1260,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond B4 moyen : {np.around(pd.to_numeric(df['Cond B4'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B4')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1331,11 +1274,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond C1 moyen : {np.around(pd.to_numeric(df['Cond C1'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C1')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1345,11 +1288,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond C2 moyen : {np.around(pd.to_numeric(df['Cond C2'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C2')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1359,11 +1302,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond C3 moyen : {np.around(pd.to_numeric(df['Cond C3'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C3')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1373,11 +1316,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond C4 moyen : {np.around(pd.to_numeric(df['Cond C4'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C4')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -1557,19 +1500,10 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         df = pd.read_excel(df,sheet_name="ION_intake")
         # print(df.columns)
         col1,col2 = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
-
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
+        df['TDS (mg/l)'].replace(0, np.nan, inplace=True)
         df['TOC (mg/l)'] = df['TOC (mg/l)'].replace('<3',1)
         df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
         df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
@@ -1676,19 +1610,14 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
             #         ay=-40  # Position Y de la flèche par rapport au texte
             #     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>TDS (mg/l) moyenne: {np.around(df['TDS (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="TDS (mg/l)")
+            st.plotly_chart(fig,use_container_width=True,height = 200)
     elif (unity == "ION EXCHANGE") & (phase =="PERMEAT FILTRATION"):
         df = pd.read_excel(df,sheet_name="ION_PERMEAT FILTRATION")
         col1,col2, = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
 
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
@@ -2143,16 +2072,6 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
     elif (unity == "ION EXCHANGE") & (phase =="PERMEAT RO"):
         df = pd.read_excel(df,sheet_name="ION_PERMEAT RO")
         col1,col2 = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
-
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('#VALEUR!', np.nan, inplace=True)
@@ -2160,11 +2079,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond A moyen : {np.around(pd.to_numeric(df['Cond A'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond A')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2174,11 +2093,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond B moyen : {np.around(pd.to_numeric(df['Cond B'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond B')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2188,11 +2107,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond C moyen : {np.around(pd.to_numeric(df['Cond C'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond C')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2202,11 +2121,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond D moyen : {np.around(pd.to_numeric(df['Cond D'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond D')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2216,11 +2135,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond E moyen : {np.around(pd.to_numeric(df['Cond E'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond E')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2230,11 +2149,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond F moyen : {np.around(pd.to_numeric(df['Cond F'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond F')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2244,11 +2163,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond G moyen : {np.around(pd.to_numeric(df['Cond G'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond G')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2258,11 +2177,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Cond H moyen : {np.around(pd.to_numeric(df['Cond H'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond H')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2385,21 +2304,12 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
     # filtrage selon l'unité MCT
     elif (unity == "MCT") & (phase =="intake"):
         df = pd.read_excel(df,sheet_name="MCT_intake")
-        # print(df.columns)
-        # col1,col2 = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
+        col1,col2 = st.columns((2))
 
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
+        df['TDS (mg/l)'].replace(0, np.nan, inplace=True)
         df['TOC (mg/l)'] = df['TOC (mg/l)'].replace('<3',1)
         df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
         df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
@@ -2407,30 +2317,10 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond. (mS/cm) à 25° C moyen: {np.around(df['Cond. (mS/cm) à 25° C'].mean(),2)}</h2>", unsafe_allow_html=True)        
             fig = px.line(df,x="date",y="Cond. (mS/cm) à 25° C")
-            # fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
-            # fig.add_annotation(
-            #         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-            #         y=0.1,  # Position Y (sur la ligne horizontale)
-            #         text="Cond. (mS/cm) à 25° C doit être inférieur ou égale à 0.1",  # Texte de l'annotation
-            #         showarrow=True,  # Afficher une flèche pointant vers le point
-            #         arrowhead=2,  # Type de flèche
-            #         ax=0,  # Position X de la flèche par rapport au texte
-            #         ay=-40  # Position Y de la flèche par rapport au texte
-            #     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>Turb (NTU) moyen: {np.around(df['Turb (NTU)'].mean(),2)}</h2>", unsafe_allow_html=True)        
             fig = px.line(df,x="date",y="Turb (NTU)")
-            # fig.add_hline(y=0.1, line_dash="dash", line_color="red", line_width=2)
-            # fig.add_annotation(
-            #         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-            #         y=0.1,  # Position Y (sur la ligne horizontale)
-            #         text="Turb (NTU) doit être inférieur ou égale à 0.1",  # Texte de l'annotation
-            #         showarrow=True,  # Afficher une flèche pointant vers le point
-            #         arrowhead=2,  # Type de flèche
-            #         ax=0,  # Position X de la flèche par rapport au texte
-            #         ay=-40  # Position Y de la flèche par rapport au texte
-            #     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>PO43- (mg/l) moyen: {np.around(df['PO43- (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)        
@@ -2495,39 +2385,20 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>pH moyenne: {np.around(df['pH'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y="pH")
-            # fig.add_hline(y=0, line_dash="dash", line_color="red", line_width=2)
-            # fig.add_annotation(
-            #         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-            #         y=0,  # Position Y (sur la ligne horizontale)
-            #         text="Cl2 libre doit être égale à 0",  # Texte de l'annotation
-            #         showarrow=True,  # Afficher une flèche pointant vers le point
-            #         arrowhead=2,  # Type de flèche
-            #         ax=0,  # Position X de la flèche par rapport au texte
-            #         ay=-40  # Position Y de la flèche par rapport au texte
-            #     )
+            st.plotly_chart(fig,use_container_width=True,height = 200)   
+        with col1:
+            st.markdown(f"<h2 style='text-align: center;'>TDS (mg/l) moyenne: {np.around(df['TDS (mg/l)'].mean(),2)}</h2>", unsafe_allow_html=True)
+            fig = px.line(df,x="date",y="TDS (mg/l)")
             st.plotly_chart(fig,use_container_width=True,height = 200)
     elif (unity == "MCT") & (phase =="APRES FILTRES A CARTOUCHE"):
         df = pd.read_excel(df, sheet_name="MCT_APRES FILTRES A CARTOUCHE")
-        # df['date'] = pd.to_datetime(df['date'])
 
-        # # Définir les dates minimales et maximales
-        # startDate = df['date'].min()
-        # endDate = df['date'].max()
+        col1,col2 = st.columns((2))
 
-        # # Créer les colonnes pour la sélection des dates
-        # col1, col2 = st.columns(2)
-
-        # with col1:
-        #     date1 = st.date_input("Start Date", startDate)
-
-        # with col2:
-        #     date2 = st.date_input("End Date", endDate)
-
-        # Filtrer les données en fonction des dates sélectionnées
-        df = df[(df['date'] >= pd.to_datetime(date1)) & (df['date'] <= pd.to_datetime(date2))]
+        df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('en cours', np.nan, inplace=True)
-
+   
         df['TOC (mg/l) LIGNE 1'] = df['TOC (mg/l) LIGNE 1'].replace('<3',1)
         df['TOC (mg/l) LIGNE 1'] = df['TOC (mg/l) LIGNE 1'].replace(0,1)
         df['TOC (mg/l) LIGNE 1'] = df['TOC (mg/l) LIGNE 1'].astype(float)
@@ -2550,8 +2421,7 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         df['TOC (mg/l) LIGNE 4'] = df['TOC (mg/l) LIGNE 4'].astype(float)
         df.loc[df['TOC (mg/l) LIGNE 4'] < 3, 'TOC (mg/l) LIGNE 4'] = 1
         df.loc[df['TOC (mg/l) LIGNE 4'] > 3, 'TOC (mg/l) LIGNE 4'] = 0
-        print(df)
-#LIGNE 1
+    #LIGNE 1
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>pH LIGNE 1 moyen: {np.around(df['pH LIGNE 1'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='pH LIGNE 1')
@@ -2650,7 +2520,7 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
-#LIGNE 2      
+    #LIGNE 2      
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>pH LIGNE 2 moyen: {np.around(df['pH LIGNE 2'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='pH LIGNE 2')
@@ -2749,7 +2619,7 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
-#LIGNE 3
+    #LIGNE 3
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>pH LIGNE 3 moyen: {np.around(df['pH LIGNE 3'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='pH LIGNE 3')
@@ -2848,7 +2718,7 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
                         ay=-40  # Position Y de la flèche par rapport au texte
                     )
             st.plotly_chart(fig,use_container_width=True,height = 200)
-#LIGNE 4
+    #LIGNE 4
         with col2:
             st.markdown(f"<h2 style='text-align: center;'>pH LIGNE 4 moyen: {np.around(df['pH  LIGNE 4'].mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='pH  LIGNE 4')
@@ -2950,16 +2820,6 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
     elif (unity == "MCT") & (phase =="PERMEAT RO"): 
         df = pd.read_excel(df,sheet_name="MCT_PERMEAT RO")
         col1,col2 = st.columns((2))
-        # df['date'] = pd.to_datetime(df['date'])
-
-        # startDate = pd.to_datetime(df["date"]).min()
-        # endDate = pd.to_datetime(df["date"]).max()
-
-        # with col1:
-        #     date1 = pd.to_datetime(st.date_input("Start Date", startDate))
-
-        # with col2:
-        #     date2 = pd.to_datetime(st.date_input("End Date", endDate))
         df = df[(df["date"] >= date1) & (df["date"] <= date2)]
         df.replace('/', np.nan, inplace=True)
         df.replace('#VALEUR!', np.nan, inplace=True)
@@ -2967,11 +2827,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond LIGNE 1 moyen: {np.around(pd.to_numeric(df['Cond LIGNE 1'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond LIGNE 1')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond LIGNE 1 doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond LIGNE 1 doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -2996,11 +2856,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
                 st.markdown(f"<h2 style='text-align: center;'>Cond LIGNE 2 moyen: {np.around(pd.to_numeric(df['Cond LIGNE 2'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
                 fig = px.line(df,x="date",y='Cond LIGNE 2')
-                fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+                fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
                 fig.add_annotation(
                             x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                            y=0.45,  # Position Y (sur la ligne horizontale)
-                            text="Cond LIGNE 2 doit être inférieur à 0.45",  # Texte de l'annotation
+                            y=450,  # Position Y (sur la ligne horizontale)
+                            text="Cond LIGNE 2 doit être inférieur à 450",  # Texte de l'annotation
                             showarrow=True,  # Afficher une flèche pointant vers le point
                             arrowhead=2,  # Type de flèche
                             ax=0,  # Position X de la flèche par rapport au texte
@@ -3025,11 +2885,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
                 st.markdown(f"<h2 style='text-align: center;'>Cond LIGNE 3 moyen: {np.around(pd.to_numeric(df['Cond LIGNE 3'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
                 fig = px.line(df,x="date",y='Cond LIGNE 3')
-                fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+                fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
                 fig.add_annotation(
                             x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                            y=0.45,  # Position Y (sur la ligne horizontale)
-                            text="Cond LIGNE 3 doit être inférieur à 0.45",  # Texte de l'annotation
+                            y=450,  # Position Y (sur la ligne horizontale)
+                            text="Cond LIGNE 3 doit être inférieur à 450",  # Texte de l'annotation
                             showarrow=True,  # Afficher une flèche pointant vers le point
                             arrowhead=2,  # Type de flèche
                             ax=0,  # Position X de la flèche par rapport au texte
@@ -3054,11 +2914,11 @@ def Visualisation_des_paramètres(df,unity,phase,date1,date2):
         with col1:
             st.markdown(f"<h2 style='text-align: center;'>Cond LIGNE 4 moyen: {np.around(pd.to_numeric(df['Cond LIGNE 4'], errors='coerce').mean(),2)}</h2>", unsafe_allow_html=True)
             fig = px.line(df,x="date",y='Cond LIGNE 4')
-            fig.add_hline(y=0.45, line_dash="dash", line_color="red", line_width=2)
+            fig.add_hline(y=450, line_dash="dash", line_color="red", line_width=2)
             fig.add_annotation(
                         x=df['date'].iloc[-1],  # Position X (la dernière date dans ce cas)
-                        y=0.45,  # Position Y (sur la ligne horizontale)
-                        text="Cond LIGNE 4 doit être inférieur à 0.45",  # Texte de l'annotation
+                        y=450,  # Position Y (sur la ligne horizontale)
+                        text="Cond LIGNE 4 doit être inférieur à 450",  # Texte de l'annotation
                         showarrow=True,  # Afficher une flèche pointant vers le point
                         arrowhead=2,  # Type de flèche
                         ax=0,  # Position X de la flèche par rapport au texte
@@ -3091,6 +2951,8 @@ def Comparaison_des_phases_de_traitement(t,data,date1,date2,graphique):
         df[k].replace('/', np.nan, inplace=True)
         df[k].replace('#VALEUR!', np.nan, inplace=True)
         df[k].replace('en cours', np.nan, inplace=True) 
+        if k.endswith("_intake"):
+            df[k]['TDS (mg/l)'].replace(0, np.nan, inplace=True)
 
     df1 = {'date':df[c]["date"]}
     legend = []
@@ -3104,11 +2966,6 @@ def Comparaison_des_phases_de_traitement(t,data,date1,date2,graphique):
     df1 = pd.DataFrame(df1)
     df1 =  df1[(df1["date"] >= date1) & (df1["date"] <= date2)] 
     if (df1.columns[1][:2] != df1.columns[2][:2] ):
-        # col1,col2 = st.columns((2))
-        # with col1:
-        #     selected_color1 = st.color_picker(f'Choisissez la couleur de {df1.columns[1][:4]}', '#095DBA')
-        # with col2:
-        #     selected_color2 = st.color_picker(f'Choisissez la couleur de {df1.columns[2][:4]}', '#FF4B4A')
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
@@ -3134,11 +2991,6 @@ def Comparaison_des_phases_de_traitement(t,data,date1,date2,graphique):
 
         st.plotly_chart(fig, use_container_width=True)
     else:
-        # col1,col2 = st.columns((2))
-        # with col1:
-        #     selected_color1 = st.color_picker(f'Choisissez le couleur du premiére paramètre', '#095DBA')
-        # with col2:
-        #     selected_color2 = st.color_picker(f'Choisissez le couleur du deuxiéme paramètre', '#FF4B4A') 
         st.markdown(f"<h3 style='text-align: center;'>Variation de {title[:4]} pendant les phases séléctionner</h3>", unsafe_allow_html=True)        
         fig = px.line(df1,x="date",y=df1.columns[1:])
         fig.update_traces(line=dict(color='#095DBA'), selector=dict(name=df1.columns[1]))
@@ -3153,14 +3005,10 @@ def Comparaison_des_phases_de_traitement(t,data,date1,date2,graphique):
            if df1["Pourcentage"].iloc[i] <0:
                df1["Pourcentage"].iloc[i] = np.nan
 
-        # with open("styles.css") as f:
-        #     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-        
-        
         if graphique == "Graphique à barres":
             # selected_color = st.color_picker(f'Choisissez une couleur', '#FF4B4A')
             st.markdown(f"<h3 style='text-align: center;'>Pourcentage d'élémination moyenne de {title[:4]} :{np.round(df1['Pourcentage'].mean(),2)}  %</h3>", unsafe_allow_html=True)        
-            fig = px.bar(df1,x="date",y="Pourcentage",color_discrete_sequence=['#FF4B4A'],height = 380)
+            fig = px.bar(df1,x="date",y="Pourcentage",color_discrete_sequence=['#FF4B4A'],height = 450)
             fig.update_traces(text=df1["Pourcentage"], textposition='outside')
             st.plotly_chart(fig,use_container_width=True)
         elif graphique == "Graphique en lignes":
@@ -3170,10 +3018,6 @@ def Comparaison_des_phases_de_traitement(t,data,date1,date2,graphique):
 
         elif graphique == "Graphique à points":
             graphique_pourcentage_elimination(df1,"date","Pourcentage",title,px.scatter)    
-    # else:
-    #     st.markdown(f"<h3 style='text-align: center;'>Variation de {title[:4]} pendant les phases séléctionner</h3>", unsafe_allow_html=True)        
-    #     fig = px.line(df1,x="date",y=df1.columns[1:])
-    #     st.plotly_chart(fig,use_container_width=True,height = 200)  
 def generate_hex_colors(n):
     colors = []
     for _ in range(n):
@@ -3245,11 +3089,6 @@ def labo_oper(d1,d2,phase1,phase2,x,y):
     df.replace('erroné', np.nan, inplace=True)
     df.replace('en cours', np.nan, inplace=True)
 
-    # col1,col2 = st.columns((2))
-    # with col1:
-    #     selected_color1 = st.color_picker(f'Choisissez la couleur de {x}', '#095DBA')
-    # with col2:
-    #     selected_color2 = st.color_picker(f'Choisissez la couleur de {y}', '#FF4B4A')
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     fig.add_trace(
@@ -3282,12 +3121,6 @@ def labo_oper1(d1,d2,phase1,phase2,x,y):
     df.replace('erroné', np.nan, inplace=True)
     df.replace('-', np.nan, inplace=True)
     df.replace('en cours', np.nan, inplace=True)
-    # df.replace('', np.nan, inplace=True)
-    # col1,col2 = st.columns((2))
-    # with col1:
-    #     selected_color1 = st.color_picker(f'Choisissez la couleur de {x}', '#095DBA')
-    # with col2:
-    #     selected_color2 = st.color_picker(f'Choisissez la couleur de {y}', '#FF4B4A')
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     fig.add_trace(
@@ -3321,11 +3154,11 @@ def labo_oper2(d1,d2,phase1,x,y):
     df.replace('-', np.nan, inplace=True)
     df.replace('en cours', np.nan, inplace=True)
     # df.replace('', np.nan, inplace=True)
-    col1,col2 = st.columns((2))
-    with col1:
-        selected_color1 = st.color_picker(f'Choisissez la couleur de {x}', '#095DBA')
-    with col2:
-        selected_color2 = st.color_picker(f'Choisissez la couleur de {y}', '#FF4B4A')
+    # col1,col2 = st.columns((2))
+    # with col1:
+    #     selected_color1 = st.color_picker(f'Choisissez la couleur de {x}', '#095DBA')
+    # with col2:
+    #     selected_color2 = st.color_picker(f'Choisissez la couleur de {y}', '#FF4B4A')
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     fig.add_trace(
@@ -3459,13 +3292,39 @@ def compar_unity_op(data,unity,phase,params,date1,date2):
 
     fig = px.bar(df1,x="date",y=df1.columns[1:])
     st.plotly_chart(fig,use_container_width=True,height = 200)
-def visualisation_volume(df):
+def visualisation_volume(df,date1,date2):
+    df = df[(df["Date"] >= date1) & (df["Date"] <= date2)]
     st.markdown(f"<h2 style='text-align: center;'>Volume Produit de chaque unitée en m3</h2>", unsafe_allow_html=True)        
-    fig = px.line(df,x="Date",y=df.columns[1:df.shape[1]-1])
-    st.plotly_chart(fig,use_container_width=True,height = 200)
+    fig1 = px.line(df,x="Date",y=df.columns[1:df.shape[1]-1])
+    st.plotly_chart(fig1,use_container_width=True,height = 200)
+    
     st.markdown(f"<h2 style='text-align: center;'>Volume Total en m3</h2>", unsafe_allow_html=True)        
-    fig = px.line(df,x="Date",y=df.columns[-1])
-    st.plotly_chart(fig,use_container_width=True,height = 200)
+    fig2 = px.line(df,x="Date",y=df.columns[-1])
+    st.plotly_chart(fig2,use_container_width=True,height = 200)
+    # st.markdown(f"<h2 style='text-align: center;'>Volume Produit de {df.columns[1]} en m3</h2>", unsafe_allow_html=True)        
+    # fig = px.line(df, x="Date", y=df.columns[1], text=df[df.columns[1]])
+    # fig.update_traces(mode='lines+markers+text', textposition='top right')
+    # st.plotly_chart(fig, use_container_width=True, height=200)
+    
+    # st.markdown(f"<h2 style='text-align: center;'>Volume Produit de {df.columns[2]} en m3</h2>", unsafe_allow_html=True)        
+    # fig = px.line(df, x="Date", y=df.columns[2], text=df[df.columns[2]])
+    # fig.update_traces(mode='lines+markers+text', textposition='top right')
+    # st.plotly_chart(fig, use_container_width=True, height=200)
+    
+    # st.markdown(f"<h2 style='text-align: center;'>Volume Produit de {df.columns[3]} en m3</h2>", unsafe_allow_html=True)        
+    # fig = px.line(df, x="Date", y=df.columns[3], text=df[df.columns[3]])
+    # fig.update_traces(mode='lines+markers+text', textposition='top right')
+    # st.plotly_chart(fig, use_container_width=True, height=200)
+    
+    # st.markdown(f"<h2 style='text-align: center;'>Volume Produit de {df.columns[4]} en m3</h2>", unsafe_allow_html=True)        
+    # fig = px.line(df, x="Date", y=df.columns[4], text=df[df.columns[4]])
+    # fig.update_traces(mode='lines+markers+text', textposition='top right')
+    # st.plotly_chart(fig, use_container_width=True, height=200)
+    
+    # st.markdown(f"<h2 style='text-align: center;'>Volume Produit de {df.columns[5]} en m3</h2>", unsafe_allow_html=True)        
+    # fig = px.line(df, x="Date", y=df.columns[5], text=df[df.columns[5]])
+    # fig.update_traces(mode='lines+markers+text', textposition='top right')
+    # st.plotly_chart(fig, use_container_width=True, height=200)
 def visualisation_volume_op(data1,data2,phase,volume, param):
     df1 = {'date':data2['Date']}
     # df['date'] = data2['Date']
@@ -3500,3 +3359,71 @@ def visualisation_volume_op(data1,data2,phase,volume, param):
     fig.update_yaxes(title_text=df1.columns[2][:6], secondary_y=True)
 
     st.plotly_chart(fig, use_container_width=True)
+def send_notification(df,seuil,param,gmail_cfg):
+    df.replace('/', np.nan, inplace=True)
+    df.replace('en cours', np.nan, inplace=True)
+    df['TDS (mg/l)'].replace(0, np.nan, inplace=True)
+    df['TOC (mg/l)'] = df['TOC (mg/l)'].replace('<3',1)
+    df['TOC (mg/l)'] = df['TOC (mg/l)'].astype(float)
+    df.loc[df['TOC (mg/l)'] < 3, 'TOC (mg/l)'] = 1
+    df.loc[df['TOC (mg/l)'] > 3, 'TOC (mg/l)'] = 0
+
+    # Vérification de la dernière valeur de PO43-
+    valeur_actuelle = float(df[param].iloc[-1])
+ 
+    if valeur_actuelle > seuil:
+        # Génération de l'image du graphique
+        fig = px.line(df, x="date", y=param)
+        fig.add_hline(y=seuil, line_dash="dash", line_color="red", line_width=2)
+        fig.add_annotation(
+            x=df['date'].iloc[-1],
+            y=seuil,
+            text=f"{param} doit être inférieur ou égal à {seuil}",
+            showarrow=True,
+            arrowhead=2,
+            ax=0,
+            ay=-40
+        )
+
+        # Sauvegarde le graphique comme image
+        pio.write_image(fig, f"graph_{param[:5]}.png")
+
+        # Création du message e-mail
+        msg = EmailMessage()
+        msg['To'] = "aitomar.mip.97@gmail.com"
+        msg['From'] = gmail_cfg['email']
+        msg['Subject'] = f"URGENT - Alerte Dépassement des Seuils des Paramètres Critiques"
+        msg.set_content(f'''Bonjour,
+
+        Attention : Des dépassements critiques des seuils ont été détectés dans les dernières mesures des paramètres de qualité de l'eau. Veuillez prendre les mesures nécessaires immédiatement pour corriger ces anomalies.
+
+        Les détails des dépassements sont les suivants :
+
+        - La valeur de {param} est de {valeur_actuelle} et a dépassé le seuil de {seuil}.
+
+        Ces dépassements peuvent indiquer un risque potentiel pour la qualité de l'eau traitée. Nous vous recommandons de vérifier le système de traitement de l'eau et de rectifier les niveaux des paramètres concernés immédiatement.
+
+        Des graphiques en pièce jointe montrent les tendances des paramètres au cours des derniers jours. Veuillez les consulter pour une analyse détaillée.
+
+        **Ceci est une situation urgente et nécessite une action rapide !**
+
+        Merci de nous tenir informés de vos actions pour remédier à ce problème.
+
+        Cordialement,
+
+        mohamed AIT-OMAR
+        Data Science''')
+
+        # Ajout de l'image en pièce jointe
+        with open(f'graph_{param[:5]}.png', 'rb') as f:
+            file_data = f.read()
+            file_name = f.name
+            msg.add_attachment(file_data, maintype='image', subtype='png', filename=file_name)
+
+        # Envoi de l'e-mail
+        with smtplib.SMTP_SSL(gmail_cfg['serveur'], gmail_cfg['port']) as smtp:
+            smtp.login(gmail_cfg['email'], gmail_cfg['pwd'])
+            smtp.send_message(msg)
+            print("Notification envoyée avec succès avec le graphique !")
+    else:
+        print(f"La valeur actuelle de {param} est inférieure ou égale au seuil. Aucune notification envoyée.")
